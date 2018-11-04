@@ -30,3 +30,36 @@ test('class ', (t) => {
   pass
 `)
 })
+
+test('math', (t) => {
+  t.plan(1)
+  t.equal(f.convert('offset * (period - 1)'), `offset * (period - 1)`)
+})
+
+test('for as while', (t) => {
+  t.plan(1)
+  t.equal(f.convert('for (let i = 0, j = 1; i < j; i += 1) {}'), `i = 0
+j = 1
+while i < j:
+  pass
+  i += 1
+`)
+})
+
+test('for range', (t) => {
+  t.plan(1)
+  t.equal(f.convert('for (let i = 0; i < period; i++) {}'), 'for i in range(0, period):\n  pass\n')
+})
+
+test('sample code', (t) => {
+  t.plan(1)
+  t.equal(f.convert(`
+  const m = offset * (period - 1)
+  const s = period / sigma
+  let windowSum = 0
+  let sum = 0
+ `), `m = offset * (period - 1)
+s = period / sigma
+windowSum = 0
+sum = 0`)
+})
