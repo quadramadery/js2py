@@ -24,7 +24,9 @@ test('destructure declarator', (t) => {
 test('class ', (t) => {
   t.plan(2)
   t.equal(f.convert('class A {}'), `class A:
-  pass`)
+  pass
+`)
   t.equal(f.convert('class A extends B {}'), `class A(B):
-  pass`)
+  pass
+`)
 })

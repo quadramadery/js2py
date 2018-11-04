@@ -5,6 +5,15 @@ const espree = require('espree')
 class Visitor {
 
   constructor() {
+    this.indent = ''
+  }
+
+  indentInc() {
+    this.indent += '  '
+  }
+
+  indentDec() {
+    this.indent = this.indent.substring(0, this.indent.length - 2)
   }
 
   traverse(node) {
@@ -38,15 +47,17 @@ class Visitor {
   ClassBody(node) {
     const stmts = node.body.map(e => this.traverse(e))
     if (stmts.length === 0) {
-      return 'pass\n'
+      return `${this.indent}pass\n`
     }
-    return stmts.join('\n')
+    return this.indent + stmts.join(`${this.indent}\n`)
   }
 
   ClassDeclaration(node) {
     const id = this.traverse(node.id)
     const superClass = node.superClass ? `(${this.traverse(node.superClass)})` : ''
+    this.indentInc()
     const body = this.traverse(node.body)
+    this.indentDec()
     return `class ${id}${superClass}:\n${body}`
   }
 
