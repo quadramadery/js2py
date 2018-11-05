@@ -115,6 +115,25 @@ ${this.indent}${body}${this.indent2()}${update}
     }
   }
 
+  IfStatement(node) {
+    this.indentInc()
+    const test = this.traverse(node.test)
+    const consequent = this.traverse(node.consequent)
+    const alternate = this.traverse(node.alternate)
+    this.indentDec()
+
+    const optionalAlternate = alternate ? `\nelse:\n${this.indent}${alternate}` : ''
+    
+    return `if ${test}:
+${this.indent}${consequent}${optionalAlternate}`
+  }
+
+  CallExpression(node) {
+    const callee = this.traverse(node.callee)
+    const args = node.arguments.map(arg => this.traverse(arg))
+    return `${callee}(${args.join(', ')})`
+  }
+
   ExpressionStatement(node) {
     return this.traverse(node.expression)
   }
