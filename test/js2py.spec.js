@@ -64,6 +64,11 @@ test('function', (t) => {
   t.equal(f.convert('a()'), 'a()')
 })
 
+test('member expression', (t) => {
+  t.plan(1)
+  t.equal(f.convert('a.b()'), 'a.b()')
+})
+
 test('sample code', (t) => {
   t.plan(1)
   t.equal(f.convert(`
