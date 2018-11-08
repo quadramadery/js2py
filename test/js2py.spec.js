@@ -69,6 +69,16 @@ test('member expression', (t) => {
   t.equal(f.convert('a.b()'), 'a.b()')
 })
 
+test('new expression', (t) => {
+  t.plan(1)
+  t.equal(f.convert('new Foo()'), 'Foo()')
+})
+
+test.only('BigNumber', (t) => {
+  t.plan(1)
+  t.equal(f.convert('new BigN(a)'), 'a')
+})
+
 test('sample code', (t) => {
   t.plan(1)
   t.equal(f.convert(`

@@ -3,7 +3,7 @@
 const espree = require('espree')
 const Traverse = require('./Traverse')
 
-class Visitor {
+class ToTextVisitor {
 
   constructor() {
     this.DEFAULT_INDENT = '  '
@@ -149,6 +149,23 @@ ${this.indent}${node.consequent.text}${optionalAlternate}`
   }
 }
 
+class BigNumberVisitor {
+
+  leaveNewExpression (ast) {
+    if (ast.callee.name !== 'BigN') return
+    this.mutate(ast, ast.arguments[0])
+  }
+
+  mutate (dst, src) {
+    Object.keys(dst).map(k => {
+      delete dst[k]
+    })
+    Object.keys(src).map(k => {
+      dst[k] = src[k]
+    })
+  }
+}
+
 class JS2Py {
 
   convert(code) {
@@ -156,8 +173,10 @@ class JS2Py {
       ecmaVersion: 6
     })
     const t = new Traverse()
-    const visitor = new Visitor()
-    t.traverse(ast, visitor)
+    t.traverse(ast, new BigNumberVisitor())
+    
+    const toText = new ToTextVisitor()
+    t.traverse(ast, toText)
     return ast.text
   }
 }
