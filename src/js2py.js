@@ -156,6 +156,11 @@ class BigNumberVisitor {
     this.mutate(ast, ast.arguments[0])
   }
 
+  leaveMemberExpression (ast) {
+    if (ast.object.name !== 'BigN') return
+    this.mutate(ast, ast.property)
+  }
+
   mutate (dst, src) {
     Object.keys(dst).map(k => {
       delete dst[k]

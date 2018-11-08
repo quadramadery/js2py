@@ -75,8 +75,9 @@ test('new expression', (t) => {
 })
 
 test.only('BigNumber', (t) => {
-  t.plan(1)
+  t.plan(2)
   t.equal(f.convert('new BigN(a)'), 'a')
+  t.equal(f.convert('BigN.max(list)'), 'max(list)')
 })
 
 test('sample code', (t) => {
