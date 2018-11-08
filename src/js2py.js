@@ -1,6 +1,7 @@
 'use strict'
 
 const espree = require('espree')
+const Traverse = require('./Traverse')
 
 class Visitor {
 
@@ -26,156 +27,125 @@ class Visitor {
 
   indentDec() {
     this.indent = this.indent.substring(0, this.indent.length - this.DEFAULT_INDENT.length)
-  }
-
-  T(node) {
-    if (node == null) return
-
-    if (node.type === undefined) {
-      throw new Error(`Nt a node ${JSON.stringify(node)}`)
-    }
-
-    if (this[node.type]) {
-      return this[node.type](node)
-    } else {
-      throw new Error(`Unknown node type ${node.type} (${Object.keys(node)})`)
-    }
-  }
-
-  traverse(node) {
-    return this.T(node)
   } 
 
-  Identifier(node) {
-    return node.name
+  leaveIdentifier(node) {
+    node.text = node.name
   }
 
-  Literal(node) {
-    return node.raw
+  leaveLiteral(node) {
+    node.text = node.raw
   }
 
-  ArrayPattern(node) {
-    const elems = node.elements.map(e => this.T(e)) 
-    return `[ ${elems.join(', ')} ]`
+  leaveArrayPattern(node) {
+    const elems = node.elements.map(e => e.text) 
+    node.text = `[ ${elems.join(', ')} ]`
   }
 
-  ArrayExpression(node) {
-    const elems = node.elements.map(e => this.T(e))
-    return `[ ${elems.join(', ')} ]`
+  leaveArrayExpression(node) {
+    const elems = node.elements.map(e => e.text)
+    node.text = `[ ${elems.join(', ')} ]`
   }
 
-  ClassBody(node) {
-    const stmts = node.body.map(e => this.T(e))
+  leaveClassBody(node) {
+    const stmts = node.body.map(e => e.text)
     if (stmts.length === 0) {
-      return `${this.indent}pass\n`
+      node.text = `${this.indent2()}pass\n`
+      return
     }
-    return this.indent + stmts.join(`${this.indent}\n`)
+    node.text = this.indent + stmts.join(`${this.indent}\n`)
   }
 
-  BlockStatement(node) {
-    const stmts = node.body.map(e => this.T(e))
+  enterBlockStatement(node) {
+    this.indentInc()
+  }
+  leaveBlockStatement(node) {
+    const stmts = node.body.map(e => e.text)
     if (stmts.length === 0) {
-      return `${this.indent}pass\n`
+      node.text = `${this.indent}pass\n`
+    } else {
+      node.text = this.indent + stmts.join(`${this.indent}\n`)
     }
-    return this.indent + stmts.join(`${this.indent}\n`)
+    this.indentDec()
   }
 
-  ClassDeclaration(n) {
-    return this.I(() => {
-      const superClass = n.superClass ? `(${this.T(n.superClass)})` : ''
-      const body = this.T(n.body)
-      return `class ${this.T(n.id)}${superClass}:
-${body}`
-    })
+  leaveClassDeclaration(n) {
+    const superClass = n.superClass ? `(${n.superClass.text})` : ''
+    n.text = `class ${n.id.text}${superClass}:
+${n.body.text}`
   }
 
-  BinaryExpression(node) {
-    const left = this.T(node.left)
-    const right = this.T(node.right)
-    const left2 = node.left.type === 'BinaryExpression' ? `(${left})` : left
-    const right2 = node.right.type === 'BinaryExpression' ? `(${right})` : right
-    return `${left2} ${node.operator} ${right2}`
+  leaveExpressionStatement(ast) {
+    ast.text = ast.expression.text
   }
 
-  ForStatement(node) {
+  leaveBinaryExpression(node) {
+    const left = node.left.type === 'BinaryExpression' ? `(${node.left.text})` : node.left.text
+    const right = node.right.type === 'BinaryExpression' ? `(${node.right.text})` : node.right.text
+    node.text = `${left} ${node.operator} ${right}`
+  }
+
+  leaveForStatement(node) {
     const asForInRange = false ||
       (node.init.type === 'VariableDeclaration' && node.init.declarations.length === 1) &&
       (node.update.type === 'UpdateExpression' && node.update.operator === '++') &&
       (node.test.type === 'BinaryExpression')
 
     if (asForInRange) {
-      this.indentInc()
-      const body = this.T(node.body)
-      this.indentDec()
-
       const id = node.init.declarations[0].id.name
-      const low = this.T(node.init.declarations[0].init)
-      const high = this.T(node.test.right)
-      return `for ${id} in range(${low}, ${high}):\n${body}`
+      const low = node.init.declarations[0].init.text
+      const high = node.test.right.text
+      node.text = `for ${id} in range(${low}, ${high}):\n${node.body.text}`
+      return
     } else {
-      const init = this.T(node.init)
-      const test = this.T(node.test)
-      const update = this.T(node.update)
-      this.indentInc()
-      const body = this.T(node.body)
-      this.indentDec()
-      return `${init}
+      const init = node.init.text
+      const test = node.test.text
+      const update = node.update.text
+      const body = node.body.text
+      node.text = `${init}
 ${this.indent}while ${test}:
 ${this.indent}${body}${this.indent2()}${update}
 `
+      return
     }
   }
 
-  IfStatement(node) {
-    this.indentInc()
-    const test = this.T(node.test)
-    const consequent = this.T(node.consequent)
-    const alternate = this.T(node.alternate)
-    this.indentDec()
-
-    const optionalAlternate = alternate ? `\nelse:\n${this.indent}${alternate}` : ''
+  leaveIfStatement(node) {
+    const optionalAlternate = node.alternate ? `\nelse:\n${this.indent}${node.alternate.text}` : ''
     
-    return `if ${test}:
-${this.indent}${consequent}${optionalAlternate}`
+    node.text = `if ${node.test.text}:
+${this.indent}${node.consequent.text}${optionalAlternate}`
   }
 
-  CallExpression(node) {
-    const callee = this.T(node.callee)
-    const args = node.arguments.map(arg => this.T(arg))
-    return `${callee}(${args.join(', ')})`
+  leaveCallExpression(node) {
+    const args = node.arguments.map(arg => arg.text)
+    node.text = `${node.callee.text}(${args.join(', ')})`
   }
 
-  MemberExpression(node) {
-    const object = this.T(node.object)
-    const property = this.T(node.property)
-    return `${object}.${property}`
+  leaveMemberExpression(node) {
+    node.text = `${node.object.text}.${node.property.text}`
   }
 
-  ExpressionStatement(node) {
-    return this.T(node.expression)
+  leaveNewExpression(node) {
+    const args = node.arguments.map(arg => arg.text)
+    node.text = `${node.callee.text}(${args.join(', ')})`
   }
 
-  AssignmentExpression(node) {
-    const left = this.T(node.left)
-    const right = this.T(node.right)
-    return `${left} ${node.operator} ${right}`    
+  leaveAssignmentExpression(node) {
+    node.text = `${node.left.text} ${node.operator} ${node.right.text}`    
   }
 
-  VariableDeclarator(node) {
-    const id = this.T(node.id)
-    const init = this.T(node.init)
-    
-    return `${id} = ${init}`
+  leaveVariableDeclarator(node) {
+    node.text =`${node.id.text} = ${node.init.text}`
   }
 
-  VariableDeclaration(node) {
-    const decls = node.declarations.map(e => this.T(e))
-    return decls.join('\n')
+  leaveVariableDeclaration(node) {
+    const decls = node.declarations.map(e => e.text)
+    node.text = decls.join('\n')
   }
 
-  Program(node) {
-    const stmts = node.body.map(e => this.T(e)) 
-    return stmts.join('\n')
+  leaveProgram(node) { 
+    node.text = node.body.map(e => e.text).join('\n')
   }
 }
 
@@ -185,8 +155,10 @@ class JS2Py {
     const ast = espree.parse(code, {
       ecmaVersion: 6
     })
+    const t = new Traverse()
     const visitor = new Visitor()
-    return visitor.T(ast)
+    t.traverse(ast, visitor)
+    return ast.text
   }
 }
 
