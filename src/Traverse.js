@@ -2,7 +2,7 @@
 
 class Traverse {
 
-  traverse (ast, visitor) {
+  static traverse (ast, visitor) {
     if (ast == null) return ast
 
     if (Array.isArray(ast)) {
@@ -22,9 +22,9 @@ class Traverse {
       ast[k] = this.traverse(ast[k], visitor)
     }
 
-    visitor.leave && visitor.leave(ast)
-    const ret = visitor[leave] && visitor[leave](ast)
-    return ret || ast
+    const ret1 = visitor.leave && visitor.leave(ast)
+    const ret2 = visitor[leave] && visitor[leave](ast)
+    return ret1 || ret2 || ast
   }
 }
 

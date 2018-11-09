@@ -168,11 +168,10 @@ class JS2Py {
     const ast = espree.parse(code, {
       ecmaVersion: 6
     })
-    const t = new Traverse()
-    t.traverse(ast, new BigNumberVisitor())
+    Traverse.traverse(ast, new BigNumberVisitor())
     
     const toText = new ToTextVisitor()
-    t.traverse(ast, toText)
+    Traverse.traverse(ast, toText)
     return ast.text
   }
 }

@@ -4,8 +4,6 @@ const espree = require('espree')
 const test = require('tape')
 const Traverse = require('../src/Traverse')
 
-const tr = new Traverse()
-
 test('Traverse visits every node', (t) => {
   const ast = espree.parse(`
     function sum (a, b) {
@@ -14,7 +12,7 @@ test('Traverse visits every node', (t) => {
   `)
 
   const visited = []
-  tr.traverse(ast, {
+  Traverse.traverse(ast, {
     enter: (ast) => visited.push(ast.type)
   })
 
@@ -38,7 +36,7 @@ test('Traverse modifies ast', (t) => {
     a = b
   `)
 
-  const ast2 = tr.traverse(ast, {
+  const ast2 = Traverse.traverse(ast, {
     leaveAssignmentExpression: (ast) => ast.right
   })
 
