@@ -9,6 +9,20 @@ class Pattern {
       ecmaVersion: 6,
     })
     this.ast = ast.body[0];
+  }
+
+  apply (matches) {
+    Traverse.traverse(this.ast, {
+      leave: (ast) => 
+        (ast.type === 'Identifier' && ast.name.startsWith('_') && matches[ast.name])
+         ? matches[ast.name]
+         : ast
+    })
+
+    return this.ast
+  }
+
+  match (ast) {
     Traverse.traverse(this.ast, {
       leave: (ast) => {
         delete ast.start
@@ -19,10 +33,8 @@ class Pattern {
         return ast
       }
     })
-  }
 
-  match (ast) {
-    const matches = []
+    const matches = {}
     const match = this._match(this.ast, ast, matches)
     return match ? matches : false
   }
@@ -31,7 +43,7 @@ class Pattern {
     if (a === null && b === null) {
       return true
     } else if (a.wildcard) {
-      matches.push([a.name, b])
+      matches[a.name] = b
       return true
     } else if (a.type != undefined && a.type === b.type) { 
       for (const k in a) {
