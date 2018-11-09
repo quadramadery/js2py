@@ -6,7 +6,7 @@ const Traverse = require('../src/Traverse')
 
 const tr = new Traverse()
 
-test('Traverse', (t) => {
+test('Traverse visits every node', (t) => {
   const ast = espree.parse(`
     function sum (a, b) {
       return a + b
@@ -31,4 +31,32 @@ test('Traverse', (t) => {
     'Identifier', // a
     'Identifier' // b
   ])
+})
+
+test('Traverse modifies ast', (t) => {
+  const ast = espree.parse(`
+    a = b
+  `)
+
+  const ast2 = tr.traverse(ast, {
+    leaveAssignmentExpression: (ast) => ast.right
+  })
+
+  t.plan(1)
+  t.deepEqual(ast2, {
+    type: 'Program',
+    start: 0, end: 13,
+    body: [
+      { 
+        type: 'ExpressionStatement',
+        start: 5, end: 10,
+        expression: {
+          type: 'Identifier',
+          start: 9, end: 10,
+          name: 'b'
+        }
+      }
+    ],
+    sourceType: 'script'
+  })
 })

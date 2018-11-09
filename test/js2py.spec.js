@@ -74,7 +74,7 @@ test('new expression', (t) => {
   t.equal(f.convert('new Foo()'), 'Foo()')
 })
 
-test.only('BigNumber', (t) => {
+test('BigNumber', (t) => {
   t.plan(2)
   t.equal(f.convert('new BigN(a)'), 'a')
   t.equal(f.convert('BigN.max(list)'), 'max(list)')

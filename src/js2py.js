@@ -153,21 +153,12 @@ class BigNumberVisitor {
 
   leaveNewExpression (ast) {
     if (ast.callee.name !== 'BigN') return
-    this.mutate(ast, ast.arguments[0])
+    return ast.arguments[0]
   }
 
   leaveMemberExpression (ast) {
     if (ast.object.name !== 'BigN') return
-    this.mutate(ast, ast.property)
-  }
-
-  mutate (dst, src) {
-    Object.keys(dst).map(k => {
-      delete dst[k]
-    })
-    Object.keys(src).map(k => {
-      dst[k] = src[k]
-    })
+    return ast.property
   }
 }
 
