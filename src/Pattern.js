@@ -8,7 +8,7 @@ class Pattern {
     const ast = espree.parse(pattern, {
       ecmaVersion: 6,
     })
-    this.ast = ast.body[0];
+    this.ast = ast.body[0].expression || ast.body[0];
   }
 
   apply (matches) {
@@ -47,7 +47,7 @@ class Pattern {
       return true
     } else if (a.type != undefined && a.type === b.type) { 
       for (const k in a) {
-        if (['type'].includes(k)) continue
+        if (['type', 'start', 'end'].includes(k)) continue
         if (!this._match(a[k], b[k], matches)) {
           return false
         }
@@ -61,7 +61,7 @@ class Pattern {
       }
       return true
     } else {
-      return true
+      return a === b
     }
   }
 }

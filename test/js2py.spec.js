@@ -75,9 +75,14 @@ test('new expression', (t) => {
 })
 
 test('BigNumber', (t) => {
-  t.plan(2)
+  t.plan(7)
   t.equal(f.convert('new BigN(a)'), 'a')
   t.equal(f.convert('BigN.max(list)'), 'max(list)')
+  t.equal(f.convert('a.minus(b)'), 'a - b')
+  t.equal(f.convert('a.plus(b)'), 'a + b')
+  t.equal(f.convert('a.times(b)'), 'a * b')
+  t.equal(f.convert('a.dividedBy(b)'), 'a / b')
+  t.equal(f.convert('tr.minus(er.times(0.5)).plus(sh.times(0.25))'), '(tr - (er * 0.5)) + (sh * 0.25)')
 })
 
 test('sample code', (t) => {

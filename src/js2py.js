@@ -2,6 +2,7 @@
 
 const espree = require('espree')
 const Traverse = require('./Traverse')
+const Pattern = require('./Pattern')
 
 class ToTextVisitor {
 
@@ -156,9 +157,21 @@ class BigNumberVisitor {
     return ast.arguments[0]
   }
 
-  leaveMemberExpression (ast) {
-    if (ast.object.name !== 'BigN') return
-    return ast.property
+  leaveCallExpression (ast) {
+    const patterns = [
+      ['BigN._1(_2)', '_1(_2)'],
+      ['_1.minus(_2)', '_1 - _2'],
+      ['_1.plus(_2)', '_1 + _2'],
+      ['_1.times(_2)', '_1 * _2'],
+      ['_1.dividedBy(_2)', '_1 / _2'],
+    ]
+    for (const [from, to] of patterns) {
+      const p = new Pattern(from)
+      const matches = p.match(ast)
+      if (matches) {
+        return (new Pattern(to)).apply(matches)
+      }
+    }
   }
 }
 

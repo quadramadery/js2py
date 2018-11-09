@@ -14,7 +14,7 @@ test('Pattern match', (t) => {
   })
 })
 
-test('Pattern apply', (t) => {
+test('Apply pattern to expression', (t) => {
   const p1 = new Pattern('_1  - _2')
 
   const ast = p1.apply({
@@ -24,20 +24,50 @@ test('Pattern apply', (t) => {
 
   t.plan(1)
   t.deepEqual(ast, {
-    type: 'ExpressionStatement',
+    type: 'BinaryExpression',
     start: 0, end: 8,
-    expression: {
-      type: 'BinaryExpression',
-      start: 0, end: 8,
-      left: {
-        type: 'Identifier',
-        name: 'BigN'
-      },
-      operator: '-',
-      right: {
-        type: 'Identifier',
-        name: 'z'
-      }
+    left: {
+      type: 'Identifier',
+      name: 'BigN'
+    },
+    operator: '-',
+    right: {
+      type: 'Identifier',
+      name: 'z'
     }
+  })
+})
+
+test('Apply pattern to statement', (t) => {
+  const p1 = new Pattern('if (_1) {_2}')
+
+  const ast = p1.apply({
+    '_1': { type: 'Literal', value: 'true'},
+    '_2': { type: 'ExpressionStatement', expression: { type: 'Identifier', name: 'z'}}
+  })
+
+  t.plan(1)
+  t.deepEqual(ast, {
+    type: 'IfStatement',
+    start: 0, end: 12,
+    test: { type: 'Literal', value: 'true' },
+    consequent: {
+      type: 'BlockStatement',
+      start: 8, end: 12, 
+      body: [
+        {
+          type: 'ExpressionStatement', 
+          start: 9, end: 11,
+          expression: { 
+            type: 'ExpressionStatement', 
+            expression: {
+              type: 'Identifier',
+              name: 'z'
+            }
+          }
+        }
+      ]
+    },
+    alternate: null
   })
 })
