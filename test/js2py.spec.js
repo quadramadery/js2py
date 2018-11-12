@@ -1,16 +1,18 @@
 'use strict'
 
 const test = require('tape')
+const fs = require('fs')
 const JS2Py = require('../src/js2py')
 
 const f = new JS2Py()
 
-test('nesting', (t) => {
+test('indenting', (t) => {
   const cases = [
     [`for (let i = 0; i < 10; i++) { for (let j = 0; j < i; j++) { i+j }}`, 
 `for i in range(0, 10):
   for j in range(0, i):
-    i + j`]
+    i + j`],
+    ['class A { b() { c(); d() } }', 'class A:\n  def b():\n    c()\n    d()\n'],
   ]
   t.plan(cases.length)
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
@@ -30,13 +32,12 @@ test('for as while', (t) => {
 j = 1
 while i < j:
   pass
-  i += 1
-`)
+  i += 1`)
 })
 
 test('for range', (t) => {
   t.plan(1)
-  t.equal(f.convert('for (let i = 0; i < period; i++) {}'), 'for i in range(0, period):\n  pass\n')
+  t.equal(f.convert('for (let i = 0; i < period; i++) {}'), 'for i in range(0, period):\n  pass')
 })
 
 
@@ -53,7 +54,11 @@ test('language parts', (t) => {
     ['function a(b, c) {}', 'def a(b, c):\n  pass\n'],
     ['class A {}', 'class A:\n  pass\n'],
     ['class A extends B {}', 'class A(B):\n  pass\n'],
-    ['class A { constructor (b, c) {} }', 'class A:\n  def __init__(b, c):\n    pass\n']
+    ['class A { constructor (b, c) {} }', 'class A:\n  def __init__(b, c):\n    pass\n'],
+    ['class A { b() { super.b() } }', 'class A:\n  def b():\n    super().b()\n'],
+    ['class A { b() { super() } }', 'class A:\n  def b():\n    super().__init__()\n'],
+    ['class A { b() { this.b() } }', 'class A:\n  def b():\n    self.b()\n'],
+    ['a === b', 'a == b']
   ]
   t.plan(cases.length)
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))

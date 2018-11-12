@@ -23,12 +23,20 @@ class ToPyCodeVisitor {
     this.indent = this.indent.substring(0, this.indent.length - this.DEFAULT_INDENT.length)
   } 
 
+  leaveSuper(node) {
+    node.text = 'super()'
+  }
+
   leaveIdentifier(node) {
     node.text = node.name
   }
 
   leaveLiteral(node) {
     node.text = node.raw
+  }
+
+  leaveThisExpression(node) {
+    node.text = 'self'
   }
 
   leaveArrayPattern(node) {
@@ -50,7 +58,7 @@ class ToPyCodeVisitor {
       node.text = `${this.indent}pass\n`
       return
     }
-    node.text = this.indent + stmts.join(`${this.indent}\n`)
+    node.text = this.indent + stmts.join(`\n${this.indent}`) + '\n'
     this.indentDec()
   }
 
@@ -60,9 +68,9 @@ class ToPyCodeVisitor {
   leaveBlockStatement(node) {
     const stmts = node.body.map(e => e.text)
     if (stmts.length === 0) {
-      node.text = `${this.indent}pass\n`
+      node.text = `${this.indent}pass`
     } else {
-      node.text = this.indent + stmts.join(`${this.indent}\n`)
+      node.text = this.indent + stmts.join(`\n${this.indent}`)
     }
     this.indentDec()
   }
@@ -75,7 +83,7 @@ class ToPyCodeVisitor {
 
   leaveFunctionDeclaration(node) {
     const functionName = node.id ? node.id.text : '' 
-    node.text = `def ${functionName}(${node.params.map(p => p.text).join(', ')}):\n${node.body.text}`
+    node.text = `def ${functionName}(${node.params.map(p => p.text).join(', ')}):\n${node.body.text}\n`
   }
 
   leaveClassDeclaration(n) {
@@ -91,13 +99,16 @@ ${n.body.text}`
   leaveBinaryExpression(node) {
     const left = node.left.type === 'BinaryExpression' ? `(${node.left.text})` : node.left.text
     const right = node.right.type === 'BinaryExpression' ? `(${node.right.text})` : node.right.text
-    node.text = `${left} ${node.operator} ${right}`
+    const operator = node.operator === '===' ? '==' : node.operator    
+    node.text = `${left} ${operator} ${right}`
   }
 
   leaveForStatement(node) {
+    const forInRange = 'for (var _1 = 0; _2 < _3; _4++) _5'
     const asForInRange = false ||
       (node.init.type === 'VariableDeclaration' && node.init.declarations.length === 1) &&
-      (node.update.type === 'UpdateExpression' && node.update.operator === '++') &&
+      ((node.update.type === 'UpdateExpression' && node.update.operator === '++') ||
+      (node.update.type === 'AssignmentExpression' && node.update.operator === '+=')) &&
       (node.test.type === 'BinaryExpression')
 
     if (asForInRange) {
@@ -113,8 +124,8 @@ ${n.body.text}`
       const body = node.body.text
       node.text = `${init}
 ${this.indent}while ${test}:
-${this.indent}${body}${this.indent2()}${update}
-`
+${this.indent}${body}
+${this.indent2()}${update}`
       return
     }
   }
@@ -128,7 +139,8 @@ ${this.indent}${node.consequent.text}${optionalAlternate}`
 
   leaveCallExpression(node) {
     const args = node.arguments.map(arg => arg.text)
-    node.text = `${node.callee.text}(${args.join(', ')})`
+    const callee = `${node.callee.text}${node.callee.type === 'Super' ? '.__init__' : ''}`
+    node.text = `${callee}(${args.join(', ')})`
   }
 
   leaveMemberExpression(node) {
