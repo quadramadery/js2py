@@ -4,18 +4,11 @@ const espree = require('espree')
 const Traverse = require('./Traverse')
 const Pattern = require('./Pattern')
 
-class ToTextVisitor {
+class ToPyCodeVisitor {
 
   constructor() {
     this.DEFAULT_INDENT = '  '
     this.indent = ''
-  }
-
-  I(cb) {
-    this.indentInc()
-    const ret = cb.bind(this)()
-    this.indentDec()
-    return ret
   }
 
   indentInc() {
@@ -48,13 +41,17 @@ class ToTextVisitor {
     node.text = `[ ${elems.join(', ')} ]`
   }
 
+  enterClassBody(node) {
+    this.indentInc()
+  }
   leaveClassBody(node) {
     const stmts = node.body.map(e => e.text)
     if (stmts.length === 0) {
-      node.text = `${this.indent2()}pass\n`
+      node.text = `${this.indent}pass\n`
       return
     }
     node.text = this.indent + stmts.join(`${this.indent}\n`)
+    this.indentDec()
   }
 
   enterBlockStatement(node) {
@@ -68,6 +65,17 @@ class ToTextVisitor {
       node.text = this.indent + stmts.join(`${this.indent}\n`)
     }
     this.indentDec()
+  }
+
+  leaveMethodDefinition(node) {
+    const isConstructor = node.kind === 'constructor'
+    const methodName = isConstructor ? '__init__' : node.key.text
+    node.text = `def ${methodName}(${node.value.params.map(p => p.text).join(', ')}):\n${node.value.body.text}`
+  }
+
+  leaveFunctionDeclaration(node) {
+    const functionName = node.id ? node.id.text : '' 
+    node.text = `def ${functionName}(${node.params.map(p => p.text).join(', ')}):\n${node.body.text}`
   }
 
   leaveClassDeclaration(n) {
@@ -183,7 +191,7 @@ class JS2Py {
     })
     Traverse.traverse(ast, new BigNumberVisitor())
     
-    const toText = new ToTextVisitor()
+    const toText = new ToPyCodeVisitor()
     Traverse.traverse(ast, toText)
     return ast.text
   }
