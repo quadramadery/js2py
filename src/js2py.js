@@ -32,7 +32,7 @@ class ToPyCodeVisitor {
   }
 
   leaveLiteral(node) {
-    node.text = node.raw
+    node.text = node.value === null ? 'None' : node.raw
   }
 
   leaveThisExpression(node) {
@@ -78,12 +78,15 @@ class ToPyCodeVisitor {
   leaveMethodDefinition(node) {
     const isConstructor = node.kind === 'constructor'
     const methodName = isConstructor ? '__init__' : node.key.text
-    node.text = `def ${methodName}(${node.value.params.map(p => p.text).join(', ')}):\n${node.value.body.text}`
+    const selfAndParams = [{text: 'self'}].concat(node.value.params)
+    const params = selfAndParams.map(p => p.text).join(', ')
+    node.text = `def ${methodName}(${params}):\n${node.value.body.text}`
   }
 
   leaveFunctionDeclaration(node) {
     const functionName = node.id ? node.id.text : '' 
-    node.text = `def ${functionName}(${node.params.map(p => p.text).join(', ')}):\n${node.body.text}\n`
+    const params = node.params.map(p => p.text).join(', ')
+    node.text = `def ${functionName}(${params}):\n${node.body.text}\n`
   }
 
   leaveClassDeclaration(n) {
@@ -131,7 +134,7 @@ ${this.indent2()}${update}`
   }
 
   leaveIfStatement(node) {
-    const optionalAlternate = node.alternate ? `\nelse:\n${this.indent}${node.alternate.text}` : ''
+    const optionalAlternate = node.alternate ? `\n${this.indent}else:\n${this.indent}${node.alternate.text}` : ''
     
     node.text = `if ${node.test.text}:
 ${this.indent}${node.consequent.text}${optionalAlternate}`
@@ -163,6 +166,10 @@ ${this.indent}${node.consequent.text}${optionalAlternate}`
   leaveVariableDeclaration(node) {
     const decls = node.declarations.map(e => e.text)
     node.text = decls.join('\n')
+  }
+
+  leaveReturnStatement(node) {
+    node.text = `return${node.argument ? ' '+node.argument.text:''}`
   }
 
   leaveProgram(node) { 
