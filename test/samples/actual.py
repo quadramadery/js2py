@@ -2,13 +2,21 @@
 Indicator = require('./indicator')
 BigN = require('bignumber.js')
 class AccumulativeSwingIndex(Indicator):
-  def __init__(self, ):
-    [ limitMoveValue ] = args
-    super().__init__()
+  def __init__(self, args = []):
+    [limitMoveValue] = args
+    super().__init__({
+      'args': args,
+      'id': AccumulativeSwingIndex.id,
+      'name': undefined,
+      'dataType': 'candle',
+      'dataKey': '*'
+})
     self._lmv = limitMoveValue
     self._prevCandle = None
-  def unserialize(self, ):
+
+  def unserialize(self, args = []):
     return AccumulativeSwingIndex(args)
+
   def calcSI(self, candle, prevCandle, _lmv):
     if _lmv == 0:
           return 0
@@ -19,8 +27,8 @@ class AccumulativeSwingIndex(Indicator):
     close = candle.close
     prevClose = prevCandle.close
     prevOpen = prevCandle.open
-    k = max([ high - prevClose, prevClose - low ])
-    tr = max([ k, high - low ])
+    k = max([high - prevClose, prevClose - low])
+    tr = max([k, high - low])
     sh = prevClose - prevOpen
     er = 0
     if prevClose > high:
@@ -34,14 +42,17 @@ class AccumulativeSwingIndex(Indicator):
     siNum = ((close - prevClose) + ((close - open) * 0.5)) + ((prevClose - prevOpen) * 0.25)
     si = ((k / lmv) * 50) * (siNum / r)
     return si.toNumber()
+
   def reset(self):
     super().reset()
     self._prevCandle = None
+
   def update(self, candle):
     if self._prevCandle == None:
           return super().update(0)
     si = AccumulativeSwingIndex.calcSI(candle, self._prevCandle, self._lmv)
     return super().update(self.prev() + si)
+
   def add(self, candle):
     if self._prevCandle == None:
           super().add(0)
@@ -52,9 +63,16 @@ class AccumulativeSwingIndex(Indicator):
     self._prevCandle = candle
     return self.v()
 
+
 AccumulativeSwingIndex.id = 'asi'
 AccumulativeSwingIndex.label = 'ASI'
 AccumulativeSwingIndex.humanLabel = 'Accumulative Swing Index'
-AccumulativeSwingIndex.ui = undefined
-AccumulativeSwingIndex.args = [  ]
+AccumulativeSwingIndex.ui = {
+  'position': 'external',
+  'type': 'line'
+}
+AccumulativeSwingIndex.args = [{
+  'label': 'Limit Move Value',
+  'default': 10
+}]
 module.exports = AccumulativeSwingIndex

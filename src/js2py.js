@@ -41,12 +41,35 @@ class ToPyCodeVisitor {
 
   leaveArrayPattern(node) {
     const elems = node.elements.map(e => e.text) 
-    node.text = `[ ${elems.join(', ')} ]`
+    node.text = `[${elems.join(', ')}]`
+  }
+
+  leaveProperty(node) {
+    node.text = `'${node.key.text}': ${node.value.text}`
+  }
+
+  enterObjectExpression(node) {
+    this.indentInc()
+  }
+
+  leaveObjectExpression(node) {
+    if (node.properties.length === 0) {
+      node.text = '{}'
+      return
+    } 
+
+    const properties = node.properties.map(p => p.text)
+    node.text = `{\n${this.indent}${properties.join(`,\n${this.indent}`)}\n}`
+    this.indentDec()
   }
 
   leaveArrayExpression(node) {
     const elems = node.elements.map(e => e.text)
-    node.text = `[ ${elems.join(', ')} ]`
+    node.text = `[${elems.join(', ')}]`
+  }
+
+  leaveAssignmentPattern(node) {
+    node.text = `${node.left.text} = ${node.right.text}`
   }
 
   enterClassBody(node) {
@@ -76,11 +99,12 @@ class ToPyCodeVisitor {
   }
 
   leaveMethodDefinition(node) {
+    const NL_AFTER_METHOD = '\n'
     const isConstructor = node.kind === 'constructor'
     const methodName = isConstructor ? '__init__' : node.key.text
     const selfAndParams = [{text: 'self'}].concat(node.value.params)
     const params = selfAndParams.map(p => p.text).join(', ')
-    node.text = `def ${methodName}(${params}):\n${node.value.body.text}`
+    node.text = `def ${methodName}(${params}):\n${node.value.body.text}${NL_AFTER_METHOD}`
   }
 
   leaveFunctionDeclaration(node) {

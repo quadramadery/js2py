@@ -12,7 +12,7 @@ test('indenting', (t) => {
 `for i in range(0, 10):
   for j in range(0, i):
     i + j`],
-    ['class A { b() { c(); d() } }', 'class A:\n  def b(self):\n    c()\n    d()\n'],
+    ['class A { b() { c(); d() } }', 'class A:\n  def b(self):\n    c()\n    d()\n\n'],
   ]
   t.plan(cases.length)
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
@@ -45,8 +45,8 @@ test('language parts', (t) => {
   const cases = [
     ['var a = 1', 'a = 1'],
     ['const a = 1', 'a = 1'],
-    ['const [a] = 1', '[ a ] = 1'],
-    ['const [a, b] = [1, 2]', '[ a, b ] = [ 1, 2 ]'],
+    ['const [a] = 1', '[a] = 1'],
+    ['const [a, b] = [1, 2]', '[a, b] = [1, 2]'],
     ['new Foo()', 'Foo()'],
     ['a.b()', 'a.b()'],
     ['a()', 'a()'],
@@ -56,11 +56,14 @@ test('language parts', (t) => {
     ['function a() {return 1}', 'def a():\n  return 1\n'],
     ['class A {}', 'class A:\n  pass\n'],
     ['class A extends B {}', 'class A(B):\n  pass\n'],
-    ['class A { constructor (b, c) {} }', 'class A:\n  def __init__(self, b, c):\n    pass\n'],
-    ['class A { b() { super.b() } }', 'class A:\n  def b(self):\n    super().b()\n'],
-    ['class A { b() { super() } }', 'class A:\n  def b(self):\n    super().__init__()\n'],
-    ['class A { b() { this.b() } }', 'class A:\n  def b(self):\n    self.b()\n'],
-    ['a === b', 'a == b']
+    ['class A { constructor (b, c) {} }', 'class A:\n  def __init__(self, b, c):\n    pass\n\n'],
+    ['class A { b() { super.b() } }', 'class A:\n  def b(self):\n    super().b()\n\n'],
+    ['class A { b() { super() } }', 'class A:\n  def b(self):\n    super().__init__()\n\n'],
+    ['class A { b() { this.b() } }', 'class A:\n  def b(self):\n    self.b()\n\n'],
+    ['a === b', 'a == b'],
+    ['a = {}', 'a = {}'],
+    ['a = {b: 1}', `a = {\n  'b': 1\n}`],
+    ['a = {b: 1, c:d}', `a = {\n  'b': 1,\n  'c': d\n}`],
   ]
   t.plan(cases.length)
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
