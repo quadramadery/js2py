@@ -81,22 +81,10 @@ test('BigNumber', (t) => {
 
 test('sample code', (t) => {
   t.plan(1)
-  t.equal(f.convert(`
-const m = offset * (period - 1)
-const s = period / sigma
-let windowSum = 0
-let sum = 0
-if (prevClose > high) {
-  er = minus(prevClose)
-} else {
-  er = minus(low)
-}
- `), `m = offset * (period - 1)
-s = period / sigma
-windowSum = 0
-sum = 0
-if prevClose > high:
-  er = minus(prevClose)
-else:
-  er = minus(low)`)
+  const js = fs.readFileSync('./test/samples/sample.js').toString('utf-8')
+  const expected = fs.readFileSync('./test/samples/expected.py').toString('utf-8')
+  const actual = f.convert(js)
+  fs.writeFileSync('./test/samples/actual.py', actual)
+
+  t.equal(actual, expected)
 })
