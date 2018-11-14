@@ -44,11 +44,13 @@ test('for range', (t) => {
 test('language parts', (t) => {
   const cases = [
     ['var a = 1', 'a = 1'],
+    ['let a', ''],
     ['const a = 1', 'a = 1'],
     ['const [a] = 1', '[a] = 1'],
     ['const [a, b] = [1, 2]', '[a, b] = [1, 2]'],
     ['new Foo()', 'Foo()'],
     ['a.b()', 'a.b()'],
+    ['a[0]', 'a[0]'],
     ['a()', 'a()'],
     ['offset * (period - 1)', 'offset * (period - 1)'],
     ['function a(b, c) {}', 'def a(b, c):\n  pass\n'],
@@ -63,7 +65,10 @@ test('language parts', (t) => {
     ['a === b', 'a == b'],
     ['a = {}', 'a = {}'],
     ['a = {b: 1}', `a = {\n  'b': 1\n}`],
+    ['function f() { a = {b: 1}}', `def f():\n  a = {\n    'b': 1\n  }\n`],
     ['a = {b: 1, c:d}', `a = {\n  'b': 1,\n  'c': d\n}`],
+    ['`text`', `'text'`],
+    ['`hi ${a}/${b} in ${c}`', `'hi %f/%f in %f' % (a, b, c)`],
   ]
   t.plan(cases.length)
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))

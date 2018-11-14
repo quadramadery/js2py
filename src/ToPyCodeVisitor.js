@@ -8,15 +8,19 @@ class ToPyCodeVisitor {
   }
 
   indentInc() {
-    this.indent += this.DEFAULT_INDENT
-  }
-
-  indent2() {
     return this.indent + this.DEFAULT_INDENT
   }
 
   indentDec() {
-    this.indent = this.indent.substring(0, this.indent.length - this.DEFAULT_INDENT.length)
+    return this.indent.substring(0, this.indent.length - this.DEFAULT_INDENT.length)
+  }
+
+  indentIncSet() {
+    this.indent = this.indentInc()
+  }
+
+  indentDecSet() {
+    this.indent = this.indentDec()
   } 
 
   leaveSuper(node) {
@@ -45,7 +49,7 @@ class ToPyCodeVisitor {
   }
 
   enterObjectExpression(node) {
-    this.indentInc()
+    this.indentIncSet()
   }
 
   leaveObjectExpression(node) {
@@ -55,8 +59,8 @@ class ToPyCodeVisitor {
     } 
 
     const properties = node.properties.map(p => p.text)
-    node.text = `{\n${this.indent}${properties.join(`,\n${this.indent}`)}\n}`
-    this.indentDec()
+    node.text = `{\n${this.indent}${properties.join(`,\n${this.indent}`)}\n${this.indentDec()}}`
+    this.indentDecSet()
   }
 
   leaveArrayExpression(node) {
@@ -69,7 +73,7 @@ class ToPyCodeVisitor {
   }
 
   enterClassBody(node) {
-    this.indentInc()
+    this.indentIncSet()
   }
   leaveClassBody(node) {
     const stmts = node.body.map(e => e.text)
@@ -78,11 +82,11 @@ class ToPyCodeVisitor {
       return
     }
     node.text = this.indent + stmts.join(`\n${this.indent}`) + '\n'
-    this.indentDec()
+    this.indentDecSet()
   }
 
   enterBlockStatement(node) {
-    this.indentInc()
+    this.indentIncSet()
   }
   leaveBlockStatement(node) {
     const stmts = node.body.map(e => e.text)
@@ -91,7 +95,7 @@ class ToPyCodeVisitor {
     } else {
       node.text = this.indent + stmts.join(`\n${this.indent}`)
     }
-    this.indentDec()
+    this.indentDecSet()
   }
 
   leaveMethodDefinition(node) {
@@ -148,7 +152,7 @@ ${n.body.text}`
       node.text = `${init}
 ${this.indent}while ${test}:
 ${this.indent}${body}
-${this.indent2()}${update}`
+${this.indentInc()}${update}`
       return
     }
   }
@@ -167,7 +171,11 @@ ${this.indent}${node.consequent.text}${optionalAlternate}`
   }
 
   leaveMemberExpression(node) {
-    node.text = `${node.object.text}.${node.property.text}`
+    if (typeof node.property.value == 'number') { // TODO fix poor type quessing
+      node.text =  `${node.object.text}[${node.property.text}]`
+    } else {
+      node.text = `${node.object.text}.${node.property.text}`
+    }
   }
 
   leaveNewExpression(node) {
@@ -180,7 +188,13 @@ ${this.indent}${node.consequent.text}${optionalAlternate}`
   }
 
   leaveVariableDeclarator(node) {
-    node.text =`${node.id.text} = ${node.init.text}`
+    node.text = node.init ? `${node.id.text} = ${node.init.text}` : ''
+  }
+
+  leaveTemplateLiteral(node) {
+    const fmtString = "'" + node.quasis.map(q => q.value.raw).join('%f') + "'" // TODO infer type
+    const exprs = node.expressions.map(expr => expr.text).join(', ')
+    node.text = exprs.length === 0 ? fmtString : `${fmtString} % (${exprs})` 
   }
 
   leaveVariableDeclaration(node) {
