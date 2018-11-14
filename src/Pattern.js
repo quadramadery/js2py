@@ -8,7 +8,8 @@ class Pattern {
     const ast = espree.parse(pattern, {
       ecmaVersion: 6,
     })
-    this.ast = ast.body[0].expression || ast.body[0];
+    this.ast = ast.body[0].expression || ast.body[0]
+    this.type = this.ast.type
   }
 
   apply (matches) {

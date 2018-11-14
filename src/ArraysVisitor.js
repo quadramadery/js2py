@@ -4,19 +4,18 @@ const Pattern = require('./Pattern')
 
 class ArraysVisitor {
 
-  leaveNewExpression (ast) {
-    if (ast.callee.name !== 'BigN') return
-    return ast.arguments[0]
+  constructor () {
+    this.patterns = [
+      [new Pattern('(_1).length'), 'len(_1)'],
+      [new Pattern('_1.push(_2)'), '_1.append(_2)'],
+      [new Pattern('_1.splice(_2, 1)'), 'delete _1[_2]'],
+    ]
   }
 
-  leaveCallExpression (ast) {
-    const patterns = [
-      ['(_1).length', 'len(_1)'],
-      ['_1.push(_2)', '_1.append(_2)'],
-    ]
+  leave(ast) {
+    const patterns = this.patterns.filter(([from]) => from.type === ast.type)
     for (const [from, to] of patterns) {
-      const p = new Pattern(from)
-      const matches = p.match(ast)
+      const matches = from.match(ast)
       if (matches) {
         return (new Pattern(to)).apply(matches)
       }

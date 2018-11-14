@@ -123,6 +123,19 @@ ${n.body.text}`
     ast.text = ast.expression.text
   }
 
+  leaveUnaryExpression(node) {
+    const operators = {
+      'delete': 'del ',
+      'void': '??',
+      'typeof': '??',
+      '+': '+',
+      '-': '-',
+      '~': '??',
+      '!': 'not '
+    }
+    node.text = `${operators[node.operator]}${node.argument.text}`
+  }
+
   leaveBinaryExpression(node) {
     const left = node.left.type === 'BinaryExpression' ? `(${node.left.text})` : node.left.text
     const right = node.right.type === 'BinaryExpression' ? `(${node.right.text})` : node.right.text

@@ -69,6 +69,10 @@ test('language parts', (t) => {
     ['a = {b: 1, c:d}', `a = {\n  'b': 1,\n  'c': d\n}`],
     ['`text`', `'text'`],
     ['`hi ${a}/${b} in ${c}`', `'hi %f/%f in %f' % (a, b, c)`],
+    ['delete a[0]', 'del a[0]'],
+    ['-a', '-a'],
+    ['+a', '+a'],
+    ['!a', 'not a'],
   ]
   t.plan(cases.length)
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
@@ -86,7 +90,16 @@ test('BigNumber', (t) => {
   ]
   t.plan(cases.length)
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
-  t.plan(7)
+})
+
+test('Array', (t) => {
+  const cases = [
+    ['z.push(a)', 'z.append(a)'],
+    ['z.length', 'len(z)'],
+    ['z.splice(0, 1)', 'del z[0]'],
+  ]
+  t.plan(cases.length)
+  cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
 })
 
 test.skip('sample code', (t) => {
