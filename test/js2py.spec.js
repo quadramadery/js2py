@@ -2,7 +2,7 @@
 
 const test = require('tape')
 const fs = require('fs')
-const JS2Py = require('../src/js2py')
+const JS2Py = require('../src/JS2Py')
 
 const f = new JS2Py()
 
@@ -84,7 +84,7 @@ test('BigNumber', (t) => {
   t.plan(7)
 })
 
-test('sample code', (t) => {
+test.skip('sample code', (t) => {
   t.plan(1)
   const js = fs.readFileSync('./test/samples/sample.js').toString('utf-8')
   const expected = fs.readFileSync('./test/samples/expected.py').toString('utf-8')
