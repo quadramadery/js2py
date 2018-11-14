@@ -4,7 +4,6 @@ const espree = require('espree')
 const Traverse = require('./Traverse')
 const BigNumberVisitor = require('./BigNumberVisitor')
 const ToPyCodeVisitor = require('./ToPyCodeVisitor')
-console.log('tpc', ToPyCodeVisitor)
 
 class JS2Py {
 
