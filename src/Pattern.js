@@ -6,7 +6,8 @@ const Traverse = require('./Traverse')
 class Pattern {
   constructor(pattern) {
     const ast = espree.parse(pattern, {
-      ecmaVersion: 6,
+      ecmaVersion: 8,
+      sourceType: 'module'
     })
     this.ast = ast.body[0].expression || ast.body[0]
     this.type = this.ast.type
@@ -46,7 +47,7 @@ class Pattern {
     } else if (a.wildcard) {
       matches[a.name] = b
       return true
-    } else if (a.type != undefined && a.type === b.type) { 
+    } else if (a.type != undefined && b != undefined && a.type === b.type) { 
       for (const k in a) {
         if (['type', 'start', 'end'].includes(k)) continue
         if (!this._match(a[k], b[k], matches)) {

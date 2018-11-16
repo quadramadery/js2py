@@ -19,11 +19,22 @@ test('indenting', (t) => {
 })
 
 test('if', (t) => {
-  t.plan(1)
-  t.equal(f.convert('if (true) { a() } else { b() }'), `if true:
-  a()
-else:
-  b()`)
+  const cases = [
+    ['if (true) { a() } else { b() }', 'if true:\n  a()\nelse:\n  b()'],
+    ['if (true) a(); else b()', 'if true:\n  a()\nelse:\n  b()'],
+    ['if (a) b()', 'if a:\n  b()'],
+  ]
+  t.plan(cases.length)
+  cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
+})
+
+test('require', (t) => {
+  const cases = [
+    [`B = require('a')`, 'from a import B'],
+    [`const B = require('a')`, 'from a import B'],
+  ]
+  t.plan(cases.length)
+  cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
 })
 
 test('for as while', (t) => {

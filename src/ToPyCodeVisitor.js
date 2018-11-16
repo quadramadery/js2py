@@ -171,10 +171,12 @@ ${this.indentInc()}${update}`
   }
 
   leaveIfStatement(node) {
-    const optionalAlternate = node.alternate ? `\n${this.indent}else:\n${this.indent}${node.alternate.text}` : ''
-    
+    const consequentIndent = node.consequent.type === 'BlockStatement' ? this.indent : this.indentInc()
+    const alternateIndent = node.alternate && node.alternate.type === 'BlockStatement' ? this.indent : this.indentInc()
+    const optionalAlternate = node.alternate ? `\n${this.indent}else:\n${alternateIndent}${node.alternate.text}` : ''
+
     node.text = `if ${node.test.text}:
-${this.indent}${node.consequent.text}${optionalAlternate}`
+${consequentIndent}${node.consequent.text}${optionalAlternate}`
   }
 
   leaveCallExpression(node) {
@@ -217,6 +219,15 @@ ${this.indent}${node.consequent.text}${optionalAlternate}`
 
   leaveReturnStatement(node) {
     node.text = `return${node.argument ? ' '+node.argument.text:''}`
+  }
+
+  leaveImportDefaultSpecifier(node) {
+    node.text = node.local.text
+  }
+
+  leaveImportDeclaration(node) {
+    const packageName = node.source.text.substring(1, node.source.text.length - 1)
+    node.text = `from ${packageName} import ${node.specifiers[0].text}`
   }
 
   leaveProgram(node) { 
