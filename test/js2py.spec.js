@@ -23,6 +23,9 @@ test('if', (t) => {
     ['if (true) { a() } else { b() }', 'if true:\n  a()\nelse:\n  b()'],
     ['if (true) a(); else b()', 'if true:\n  a()\nelse:\n  b()'],
     ['if (a) b()', 'if a:\n  b()'],
+    ['class A { b() { if (a) b() } }', 'class A:\n  def b(self):\n    if a:\n      b()\n\n'],
+    ['class A { b() { if (a) { b() } } }', 'class A:\n  def b(self):\n    if a:\n      b()\n\n'],
+    ['function b() { if (a) { b() } }', 'def b():\n  if a:\n    b()\n'],
   ]
   t.plan(cases.length)
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
@@ -108,6 +111,7 @@ test('Array', (t) => {
     ['z.push(a)', 'z.append(a)'],
     ['z.length', 'len(z)'],
     ['z.splice(0, 1)', 'del z[0]'],
+    ['a[a.length - 1]', 'a[-1]'],
   ]
   t.plan(cases.length)
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))

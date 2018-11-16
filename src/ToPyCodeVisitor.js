@@ -171,8 +171,8 @@ ${this.indentInc()}${update}`
   }
 
   leaveIfStatement(node) {
-    const consequentIndent = node.consequent.type === 'BlockStatement' ? this.indent : this.indentInc()
-    const alternateIndent = node.alternate && node.alternate.type === 'BlockStatement' ? this.indent : this.indentInc()
+    const consequentIndent = node.consequent.type === 'BlockStatement' ? '' : this.indentInc()
+    const alternateIndent = node.alternate && node.alternate.type === 'BlockStatement' ? '' : this.indentInc()
     const optionalAlternate = node.alternate ? `\n${this.indent}else:\n${alternateIndent}${node.alternate.text}` : ''
 
     node.text = `if ${node.test.text}:
@@ -186,7 +186,8 @@ ${consequentIndent}${node.consequent.text}${optionalAlternate}`
   }
 
   leaveMemberExpression(node) {
-    if (typeof node.property.value == 'number') { // TODO fix poor type quessing
+    if (typeof node.property.value == 'number' ||
+      (node.property.type === 'UnaryExpression' && typeof node.property.argument.value === 'number')) { // TODO fix poor type guessing
       node.text =  `${node.object.text}[${node.property.text}]`
     } else {
       node.text = `${node.object.text}.${node.property.text}`

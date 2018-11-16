@@ -9,6 +9,7 @@ class ArraysVisitor {
       [new Pattern('(_1).length'), 'len(_1)'],
       [new Pattern('_1.push(_2)'), '_1.append(_2)'],
       [new Pattern('_1.splice(_2, 1)'), 'delete _1[_2]'],
+      [new Pattern('_1[len(_2) - _3]'), '_1[-_3]'],
     ]
   }
 
