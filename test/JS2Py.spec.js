@@ -87,6 +87,9 @@ test('language parts', (t) => {
     ['-a', '-a'],
     ['+a', '+a'],
     ['!a', 'not a'],
+    ['a || b', 'a or b'],
+    ['a && b', 'a and b'],
+    ['a ? b : c', 'b if a else c'],
   ]
   t.plan(cases.length)
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
@@ -112,6 +115,14 @@ test('Array', (t) => {
     ['z.length', 'len(z)'],
     ['z.splice(0, 1)', 'del z[0]'],
     ['a[a.length - 1]', 'a[-1]'],
+  ]
+  t.plan(cases.length)
+  cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
+})
+
+test('Inline static class attrs', (t) => {
+  const cases = [
+    ['class A { fun() {return A.id}} A.id = "MyId"', 'class A:\n  def fun(self):\n    return "MyId"\n\n']
   ]
   t.plan(cases.length)
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))

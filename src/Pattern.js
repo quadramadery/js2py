@@ -5,6 +5,8 @@ const Traverse = require('./Traverse')
 
 class Pattern {
   constructor(pattern) {
+    this.IS_VAR = /^_[0-9]+/
+
     const ast = espree.parse(pattern, {
       ecmaVersion: 8,
       sourceType: 'module'
@@ -16,7 +18,7 @@ class Pattern {
   apply (matches) {
     Traverse.traverse(this.ast, {
       leave: (ast) => 
-        (ast.type === 'Identifier' && ast.name.startsWith('_') && matches[ast.name])
+        (ast.type === 'Identifier' && this.IS_VAR.test(ast.name) && matches[ast.name])
          ? matches[ast.name]
          : ast
     })
@@ -29,7 +31,7 @@ class Pattern {
       leave: (ast) => {
         delete ast.start
         delete ast.end
-        if (ast.type === 'Identifier' && ast.name.startsWith('_')) {
+        if (ast.type === 'Identifier' && this.IS_VAR.test(ast.name)) {
           ast.wildcard = true
         }
         return ast

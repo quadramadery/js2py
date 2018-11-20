@@ -144,7 +144,6 @@ ${n.body.text}`
   }
 
   leaveForStatement(node) {
-    const forInRange = 'for (var _1 = 0; _2 < _3; _4++) _5'
     const asForInRange = false ||
       (node.init.type === 'VariableDeclaration' && node.init.declarations.length === 1) &&
       ((node.update.type === 'UpdateExpression' && node.update.operator === '++') ||
@@ -177,6 +176,18 @@ ${this.indentInc()}${update}`
 
     node.text = `if ${node.test.text}:
 ${consequentIndent}${node.consequent.text}${optionalAlternate}`
+  }
+
+  leaveConditionalExpression(node) {
+    node.text = `${node.consequent.text} if ${node.test.text} else ${node.alternate.text}`
+  }
+
+  leaveLogicalExpression(node) {
+    const operator = {
+      '||': 'or',
+      '&&': 'and',
+    }[node.operator]
+    node.text = `${node.left.text} ${operator} ${node.right.text}`
   }
 
   leaveCallExpression(node) {
@@ -227,7 +238,8 @@ ${consequentIndent}${node.consequent.text}${optionalAlternate}`
   }
 
   leaveImportDeclaration(node) {
-    const packageName = node.source.text.substring(1, node.source.text.length - 1)
+    let packageName = node.source.text.substring(1, node.source.text.length - 1)
+    if (/^\./.test(packageName)) packageName = packageName.replace('./', 'bfxhfindicators.') // TODO move out
     node.text = `from ${packageName} import ${node.specifiers[0].text}`
   }
 
