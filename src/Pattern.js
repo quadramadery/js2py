@@ -6,7 +6,7 @@ const Traverse = require('./Traverse')
 class Pattern {
   constructor(
     pattern, 
-    {matchExpression} = {matchExpression: true}
+    {matchStatement} = {matchStatement: false}
   ) {
     this.IS_VAR = /^_[0-9]+/
 
@@ -15,7 +15,7 @@ class Pattern {
       sourceType: 'module'
     })
 
-    this.ast = matchExpression && ast.body[0].expression || ast.body[0]
+    this.ast = !matchStatement && ast.body[0].expression || ast.body[0]
     this.type = this.ast.type
   }
 

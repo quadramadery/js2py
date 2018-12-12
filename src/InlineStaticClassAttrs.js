@@ -11,7 +11,7 @@ class SearchStaticClassAttrs {
   }
 
   leaveClassDeclaration(node) {
-    this.classPatterns.push([node.id.name, new Pattern(`${node.id.name}._1 = _2`, {matchExpression: false})])
+    this.classPatterns.push([node.id.name, new Pattern(`${node.id.name}._1 = _2`, {matchStatement: true})])
   }
 
   leave(ast) {

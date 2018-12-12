@@ -31,10 +31,13 @@ test('if', (t) => {
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
 })
 
-test('require', (t) => {
+test('js parts', (t) => {
   const cases = [
     [`B = require('a')`, 'from a import B'],
     [`const B = require('a')`, 'from a import B'],
+    [`"use static"`, ''],
+    [`"use static no"`, '"use static no"'],
+    [`a = "use static"`, 'a = "use static"'],
   ]
   t.plan(cases.length)
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
