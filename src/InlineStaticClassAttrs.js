@@ -11,7 +11,7 @@ class SearchStaticClassAttrs {
   }
 
   leaveClassDeclaration(node) {
-    this.classPatterns.push([node.id.name, new Pattern(`${node.id.name}._1 = _2`)])
+    this.classPatterns.push([node.id.name, new Pattern(`${node.id.name}._1 = _2`, {matchExpression: false})])
   }
 
   leave(ast) {
@@ -21,10 +21,11 @@ class SearchStaticClassAttrs {
       if (matches) {
         const staticAttr = [`${className}.${matches._1.name}`, matches._2]
         this.staticAttrs.push(staticAttr)
-        return { type: 'Literal', value: '', raw: '""'} // TODO how to remove ast nodes
+        return { type: 'Noop' }
       }
     }
   }
+
 }
 
 class InlineStaticClassAttrs {

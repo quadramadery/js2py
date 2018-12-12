@@ -76,7 +76,7 @@ class ToPyCodeVisitor {
     this.indentIncSet()
   }
   leaveClassBody(node) {
-    const stmts = node.body.map(e => e.text)
+    const stmts = node.body.filter(({type}) => type !== 'Noop').map(e => e.text)
     if (stmts.length === 0) {
       node.text = `${this.indent}pass\n`
       return
@@ -89,7 +89,7 @@ class ToPyCodeVisitor {
     this.indentIncSet()
   }
   leaveBlockStatement(node) {
-    const stmts = node.body.map(e => e.text)
+    const stmts = node.body.filter(({type}) => type !== 'Noop').map(e => e.text)
     if (stmts.length === 0) {
       node.text = `${this.indent}pass`
     } else {
@@ -244,7 +244,7 @@ ${consequentIndent}${node.consequent.text}${optionalAlternate}`
   }
 
   leaveProgram(node) { 
-    node.text = node.body.map(e => e.text).join('\n')
+    node.text = node.body.filter(({type}) => type !== 'Noop').map(e => e.text).join('\n')
   }
 }
 

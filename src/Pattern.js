@@ -4,14 +4,18 @@ const espree = require('espree')
 const Traverse = require('./Traverse')
 
 class Pattern {
-  constructor(pattern) {
+  constructor(
+    pattern, 
+    {matchExpression} = {matchExpression: true}
+  ) {
     this.IS_VAR = /^_[0-9]+/
 
     const ast = espree.parse(pattern, {
       ecmaVersion: 8,
       sourceType: 'module'
     })
-    this.ast = ast.body[0].expression || ast.body[0]
+
+    this.ast = matchExpression && ast.body[0].expression || ast.body[0]
     this.type = this.ast.type
   }
 
