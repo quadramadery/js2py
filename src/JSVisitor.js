@@ -13,13 +13,19 @@ class JSVisitor {
       }],
       source: matches._2
     })
-    const remove = () => ({ type: 'Noop' })
+    const removeFn = () => ({ type: 'Noop' })
 
     this.patterns = [
       [new Pattern('_1 = require(_2)'), importDeclFn],
       [new Pattern('const _1 = require(_2)'), importDeclFn],
-      [new Pattern('"use static"', {matchStatement: true}), remove],
+      [new Pattern('module.exports = _1'), removeFn],
     ]
+  }
+
+  leaveExpressionStatement(ast) {
+    if (ast.directive) {
+      return { type: 'Noop' }
+    }
   }
 
   leave(ast) {

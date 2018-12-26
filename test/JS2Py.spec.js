@@ -36,8 +36,10 @@ test('js parts', (t) => {
     [`B = require('a')`, 'from a import B'],
     [`const B = require('a')`, 'from a import B'],
     [`"use static"`, ''],
-    [`"use static no"`, '"use static no"'],
+    [`'use static'`, ''],
+    [`"other directive"`, ''],
     [`a = "use static"`, 'a = "use static"'],
+    [`module.exports = a`, ''],
   ]
   t.plan(cases.length)
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
