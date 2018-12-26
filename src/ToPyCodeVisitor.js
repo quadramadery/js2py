@@ -55,11 +55,10 @@ class ToPyCodeVisitor {
   leaveObjectExpression(node) {
     if (node.properties.length === 0) {
       node.text = '{}'
-      return
-    } 
-
-    const properties = node.properties.map(p => p.text)
-    node.text = `{\n${this.indent}${properties.join(`,\n${this.indent}`)}\n${this.indentDec()}}`
+    } else {
+      const properties = node.properties.map(p => p.text)
+      node.text = `{\n${this.indent}${properties.join(`,\n${this.indent}`)}\n${this.indentDec()}}`
+    }
     this.indentDecSet()
   }
 
@@ -79,9 +78,9 @@ class ToPyCodeVisitor {
     const stmts = node.body.filter(({type}) => type !== 'Noop').map(e => e.text)
     if (stmts.length === 0) {
       node.text = `${this.indent}pass\n`
-      return
+    } else {
+      node.text = this.indent + stmts.join(`\n${this.indent}`) + '\n'
     }
-    node.text = this.indent + stmts.join(`\n${this.indent}`) + '\n'
     this.indentDecSet()
   }
 
