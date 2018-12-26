@@ -197,8 +197,7 @@ ${consequentIndent}${node.consequent.text}${optionalAlternate}`
   }
 
   leaveMemberExpression(node) {
-    if (typeof node.property.value == 'number' ||
-      (node.property.type === 'UnaryExpression' && typeof node.property.argument.value === 'number')) { // TODO fix poor type guessing
+    if (node.computed) {
       node.text =  `${node.object.text}[${node.property.text}]`
     } else {
       node.text = `${node.object.text}.${node.property.text}`
