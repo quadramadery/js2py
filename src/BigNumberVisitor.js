@@ -11,6 +11,8 @@ class BigNumberVisitor {
       [new Pattern('_1.plus(_2)'), '_1 + _2'],
       [new Pattern('_1.times(_2)'), '_1 * _2'],
       [new Pattern('_1.dividedBy(_2)'), '_1 / _2'],
+      [new Pattern('_1.isEqualTo(_2)'), '_1 == _2'],
+      [new Pattern('_1.toNumber()'), '_1'],
     ]
   }
 

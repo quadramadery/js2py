@@ -111,7 +111,9 @@ test('BigNumber', (t) => {
     ['a.plus(b)', 'a + b'],
     ['a.times(b)', 'a * b'],
     ['a.dividedBy(b)', 'a / b'],
-    ['tr.minus(er.times(0.5)).plus(sh.times(0.25))', '(tr - (er * 0.5)) + (sh * 0.25)']
+    ['a.minus(b).times(0.5).plus(c.times(0.25))', '((a - b) * 0.5) + (c * 0.25)'],
+    ['a.toNumber()', 'a'],
+    ['a.isEqualTo(b)', 'a == b'],
   ]
   t.plan(cases.length)
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))

@@ -20,7 +20,7 @@ class Pattern {
   }
 
   apply (matches) {
-    Traverse.traverse(this.ast, {
+    this.ast = Traverse.traverse(this.ast, {
       leave: (ast) => 
         (ast.type === 'Identifier' && this.IS_VAR.test(ast.name) && matches[ast.name])
          ? matches[ast.name]

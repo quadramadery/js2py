@@ -14,7 +14,21 @@ test('Pattern match', (t) => {
   })
 })
 
-test('Apply pattern to expression', (t) => {
+test('Pattern is single wildcard identifier', (t) => {
+  const p1 = new Pattern('_1')
+
+  const ast = p1.apply({
+    '_1': { type: 'Identifier', name: 'a'}
+  })
+
+  t.plan(1)
+  t.deepEqual(ast, {
+    type: 'Identifier',
+    name: 'a'
+  })
+})
+
+test('Apply replaces wildcards in pattern expression', (t) => {
   const p1 = new Pattern('_1  - _2')
 
   const ast = p1.apply({
