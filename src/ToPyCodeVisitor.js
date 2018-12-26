@@ -41,7 +41,7 @@ class ToPyCodeVisitor {
 
   leaveArrayPattern(node) {
     const elems = node.elements.map(e => e.text) 
-    node.text = `[${elems.join(', ')}]`
+    node.text = `[ ${elems.join(', ')} ]`
   }
 
   leaveProperty(node) {
