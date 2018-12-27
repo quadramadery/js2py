@@ -7,20 +7,19 @@ class ToPyCodeVisitor {
     this.indent = ''
   }
 
-  indentInc() {
-    return this.indent + this.DEFAULT_INDENT
+  indentBy(n) {
+    return n > 0 ? this.indent + this.DEFAULT_INDENT
+         : n < 0 ? this.indent.substring(0, this.indent.length - this.DEFAULT_INDENT.length)
+         : this.indent
   }
 
-  indentDec() {
-    return this.indent.substring(0, this.indent.length - this.DEFAULT_INDENT.length)
+  indentBlock(n, text) {
+    const ind = this.indentBy(n)
+    return ind + text.split('\n').join(`\n${this.DEFAULT_INDENT}`)
   }
 
-  indentIncSet() {
-    this.indent = this.indentInc()
-  }
-
-  indentDecSet() {
-    this.indent = this.indentDec()
+  setIndent(n) {
+    this.indent = this.indentBy(n)
   } 
 
   leaveSuper(node) {
@@ -49,17 +48,17 @@ class ToPyCodeVisitor {
   }
 
   enterObjectExpression(node) {
-    this.indentIncSet()
+    this.setIndent(+1)
   }
 
   leaveObjectExpression(node) {
     if (node.properties.length === 0) {
       node.text = '{}'
     } else {
-      const properties = node.properties.map(p => p.text)
-      node.text = `{\n${this.indent}${properties.join(`,\n${this.indent}`)}\n${this.indentDec()}}`
+      const properties = node.properties.map(p => p.text).join(`,\n${this.indent}`)
+      node.text = `{\n${this.indent}${properties}\n${this.indentBy(-1)}}`
     }
-    this.indentDecSet()
+    this.setIndent(-1)
   }
 
   leaveArrayExpression(node) {
@@ -72,7 +71,7 @@ class ToPyCodeVisitor {
   }
 
   enterClassBody(node) {
-    this.indentIncSet()
+    this.setIndent(+1)
   }
   leaveClassBody(node) {
     const stmts = node.body.filter(({type}) => type !== 'Noop').map(e => e.text)
@@ -81,11 +80,11 @@ class ToPyCodeVisitor {
     } else {
       node.text = this.indent + stmts.join(`\n${this.indent}`) + '\n'
     }
-    this.indentDecSet()
+    this.setIndent(-1)
   }
 
   enterBlockStatement(node) {
-    this.indentIncSet()
+    this.setIndent(+1)
   }
   leaveBlockStatement(node) {
     const stmts = node.body.filter(({type}) => type !== 'Noop').map(e => e.text)
@@ -94,7 +93,7 @@ class ToPyCodeVisitor {
     } else {
       node.text = this.indent + stmts.join(`\n${this.indent}`)
     }
-    this.indentDecSet()
+    this.setIndent(-1)
   }
 
   leaveMethodDefinition(node) {
@@ -163,18 +162,18 @@ ${n.body.text}`
       node.text = `${init}
 ${this.indent}while ${test}:
 ${this.indent}${body}
-${this.indentInc()}${update}`
+${this.indentBlock(+1, update)}`
       return
     }
   }
 
   leaveIfStatement(node) {
-    const consequentIndent = node.consequent.type === 'BlockStatement' ? '' : this.indentInc()
-    const alternateIndent = node.alternate && node.alternate.type === 'BlockStatement' ? '' : this.indentInc()
-    const optionalAlternate = node.alternate ? `\n${this.indent}else:\n${alternateIndent}${node.alternate.text}` : ''
+    const consequent = node.consequent.type === 'BlockStatement' ? node.consequent.text : this.indentBlock(+1, node.consequent.text)
+    const alternate = node.alternate && (node.alternate.type === 'BlockStatement' ? node.alternate.text : this.indentBlock(+1, node.alternate.text))
+    const optionalAlternate = node.alternate ? `\n${this.indent}else:\n${alternate}` : ''
 
     node.text = `if ${node.test.text}:
-${consequentIndent}${node.consequent.text}${optionalAlternate}`
+${consequent}${optionalAlternate}`
   }
 
   leaveConditionalExpression(node) {
