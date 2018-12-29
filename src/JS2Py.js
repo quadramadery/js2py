@@ -6,6 +6,7 @@ const BigNumberVisitor = require('./BigNumberVisitor')
 const ArraysVisitor = require('./ArraysVisitor')
 const JSVisitor = require('./JSVisitor')
 const inlineStaticClassAttrs = require('./InlineStaticClassAttrs')
+const ObjectPatternDestructure = require('./ObjectPatternDestructure')
 const ToPyCodeVisitor = require('./ToPyCodeVisitor')
 
 class JS2Py {
@@ -15,6 +16,7 @@ class JS2Py {
       ecmaVersion: 8,
       sourceType: 'module'
     })
+    Traverse.traverse(ast, new ObjectPatternDestructure())
     Traverse.traverse(ast, new BigNumberVisitor())
     Traverse.traverse(ast, new ArraysVisitor())
     Traverse.traverse(ast, new JSVisitor())

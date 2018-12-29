@@ -141,6 +141,22 @@ test('Inline static class attrs', (t) => {
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
 })
 
+test('ObjectPattern', (t) => {
+  const cases = [
+    ['let { a } = b', 'a = b.a']
+  ]
+  t.plan(cases.length)
+  cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
+})
+
+test.skip('Elsif', (t) => {
+  t.plan(1)
+})
+
+test.skip('Manage/Insert imports', (t) => {
+  t.plan(1)
+})
+
 test.skip('sample code', (t) => {
   t.plan(1)
   const js = fs.readFileSync('./test/samples/sample.js').toString('utf-8')
