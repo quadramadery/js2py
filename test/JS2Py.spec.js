@@ -143,7 +143,12 @@ test('Inline static class attrs', (t) => {
 
 test('ObjectPattern', (t) => {
   const cases = [
-    ['let { a } = b', 'a = b.a']
+    ['let { a } = b', 'a = b.a'],
+    ['let { } = b', ''],
+    ['let { a, b } = c; d = a + b', 'd = c.a + c.b'],
+    ['let { a, b } = c; d = j.a + j[a]', 'd = j.a + j[c.a]'],
+    ['f(a); function b() { let { a, b } = g }', 'f(a)\ndef b():\n  pass\n'],
+    ['let { a, b } = c(); d = a + b', 'c = c()\n d = c.a + c.b']
   ]
   t.plan(cases.length)
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
