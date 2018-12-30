@@ -148,7 +148,9 @@ test('ObjectPattern', (t) => {
     ['let { a, b } = c; d = a + b', 'd = c.a + c.b'],
     ['let { a, b } = c; d = j.a + j[a]', 'd = j.a + j[c.a]'],
     ['f(a); function b() { let { a, b } = g }', 'f(a)\ndef b():\n  pass\n'],
-    ['let { a, b } = c(); d = a + b', 'c = c()\n d = c.a + c.b']
+    ['let { a, b } = c(); d = a + b', 'c1 = c()\nd = c1.a + c1.b'],
+    ['let { a, b } = x.y.c(); d = a + b', 'c = x.y.c()\nd = c.a + c.b'],
+    ['let { a, b } = f()(); d = a + b', 'tmp = f()()\nd = tmp.a + tmp.b']
   ]
   t.plan(cases.length)
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))

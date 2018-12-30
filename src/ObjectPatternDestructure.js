@@ -53,20 +53,53 @@ class ObjectPatternDestructure {
         kind: ast.kind
       }
     } else {
-      ast.id.properties.forEach(property => {
-        const oldIdentifier = property.value
-        const newIdentifier = {
-          type: 'MemberExpression',
-          object: ast.init,
-          property: {
+      if (['Identifier', 'MemberExpression'].indexOf(ast.init.type) != -1) {
+        ast.id.properties.forEach(property => {
+          const oldIdentifier = property.value
+          const newIdentifier = {
+            type: 'MemberExpression',
+            object: ast.init,
+            property: {
+              type: 'Identifier',
+              name: property.value.name
+            },
+            computed: false
+          }
+          Traverse.traverse(this.scopes[this.scopes.length - 1], new RenameVisitor(oldIdentifier, newIdentifier))
+        })
+        return { type: 'Noop' }
+      } else if (ast.init.type === 'CallExpression') {
+        const varName = ast.init.callee.type === 'Identifier' ? `${ast.init.callee.name}1`
+          : ast.init.callee.type === 'MemberExpression' ? `${ast.init.callee.property.name}`
+          : 'tmp'
+        ast.id.properties.forEach(property => {
+          const oldIdentifier = property.value
+          const newIdentifier = {
+            type: 'MemberExpression',
+            object: {
+              type: 'Identifier',
+              name: varName
+            },
+            property: {
+              type: 'Identifier',
+              name: property.value.name
+            },
+            computed: false
+          }
+          Traverse.traverse(this.scopes[this.scopes.length - 1], new RenameVisitor(oldIdentifier, newIdentifier))
+        })
+        return {
+          type: 'VariableDeclarator',
+          id: {
             type: 'Identifier',
-            name: property.value.name
+            name: varName
           },
-          computed: false
+          init: ast.init,
+          kind: ast.kind
         }
-        Traverse.traverse(this.scopes[this.scopes.length - 1], new RenameVisitor(oldIdentifier, newIdentifier))
-      })
-      return { type: 'Noop' }
+      } else {
+        throw new Error(`ObjectPatternDestructure: Unsupported init type ${ast.init.type}`)
+      }
     }
   }
 
