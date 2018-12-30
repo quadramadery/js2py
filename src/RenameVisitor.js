@@ -7,9 +7,12 @@ class RenameVisitor {
     this.newIdentifier = newIdentifier
   }
 
-  leaveIdentifier(ast) {
+  leaveIdentifier(ast, parent) {
+    if ((parent != null) && (parent.type === 'MemberExpression') && !parent.computed) {
+      return
+    }
     if (ast.name === this.oldIdentifier.name) {
-      return this.newIdentifier // TODO Rename should not apply within MemberExpression
+      return this.newIdentifier
     }
   }
 }
