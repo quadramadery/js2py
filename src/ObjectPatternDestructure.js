@@ -6,13 +6,27 @@ const RenameVisitor = require('./RenameVisitor')
 class ObjectPatternDestructure {
 
   constructor() {
-    this.scope = undefined
+    this.scopes = []
+    this.scopeTypes = [
+      'Program',
+      'FunctionDeclaration',
+      'ClassDeclaration',
+      'BlockStatement'
+    ]
   }
 
   enter(ast) {
-    if (this.scope === undefined) {
-      this.scope = ast // TODO: rename scope should be variable scope, not entire file
+    if (this.scopeTypes.indexOf(ast.type) === -1) {
+      return
     }
+    this.scopes.push(ast)
+  }
+
+  leave(ast) {
+    if (this.scopeTypes.indexOf(ast.type) === -1) {
+      return
+    }
+    this.scopes.pop()
   }
 
   leaveVariableDeclarator(ast) {
@@ -50,7 +64,7 @@ class ObjectPatternDestructure {
           },
           computed: false
         }
-        Traverse.traverse(this.scope, new RenameVisitor(oldIdentifier, newIdentifier))
+        Traverse.traverse(this.scopes[this.scopes.length - 1], new RenameVisitor(oldIdentifier, newIdentifier))
       })
       return { type: 'Noop' }
     }
