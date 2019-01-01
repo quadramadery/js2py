@@ -156,20 +156,18 @@ test('ObjectPattern', (t) => {
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
 })
 
-test.skip('Elsif', (t) => {
-  t.plan(1)
+test('Arrow functions', (t) => {
+  const cases = [
+    ['(a) => a', 'lambda a: a']
+  ]
+  t.plan(cases.length)
+  cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
 })
 
 test.skip('Manage/Insert imports', (t) => {
   t.plan(1)
 })
 
-test.skip('sample code', (t) => {
+test.skip('Elsif', (t) => {
   t.plan(1)
-  const js = fs.readFileSync('./test/samples/sample.js').toString('utf-8')
-  const expected = fs.readFileSync('./test/samples/expected.py').toString('utf-8')
-  const actual = f.convert(js)
-  fs.writeFileSync('./test/samples/actual.py', actual)
-
-  t.equal(actual, expected)
 })

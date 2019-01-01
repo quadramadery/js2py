@@ -111,6 +111,14 @@ class ToPyCodeVisitor {
     node.text = `def ${functionName}(${params}):\n${node.body.text}\n`
   }
 
+  leaveArrowFunctionExpression(node) {
+    if ((node.expression === false) && (node.body.body.length > 1)) {
+        throw new Error('Arrow function body has more than one statement')
+    }
+    const params = node.params.map(p => p.text).join(', ')
+    node.text = `lambda ${params}: ${node.body.text}`
+  }
+
   leaveClassDeclaration(n) {
     const superClass = n.superClass ? `(${n.superClass.text})` : ''
     n.text = `class ${n.id.text}${superClass}:
