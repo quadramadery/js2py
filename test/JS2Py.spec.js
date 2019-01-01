@@ -128,6 +128,7 @@ test('Array', (t) => {
     ['z.length', 'len(z)'],
     ['z.splice(0, 1)', 'del z[0]'],
     ['a[a.length - 1]', 'a[-1]'],
+    ['a.map(f)', 'map(f, a)'],
   ]
   t.plan(cases.length)
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))

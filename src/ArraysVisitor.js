@@ -11,6 +11,7 @@ class ArraysVisitor {
       [new Pattern('_1.splice(_2, 1)'), 'delete _1[_2]'],
       [new Pattern('_1[len(_2) - _3]'), '_1[-_3]'],
       [new Pattern('_isEmpty(_2)'), 'len(_2) == 0'], // TODO restrict to lodash._isEmpty
+      [new Pattern('_1.map(_2)'), 'map(_2, _1)'],
     ]
   }
 
