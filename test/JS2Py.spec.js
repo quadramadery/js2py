@@ -23,8 +23,11 @@ test('if', (t) => {
     ['if (true) { a() } else { b() }', 'if true:\n  a()\nelse:\n  b()'],
     ['if (true) a(); else b()', 'if true:\n  a()\nelse:\n  b()'],
     ['if (a) b()', 'if a:\n  b()'],
-    ['if (a) { b() } else if (c) d()', 'if a:\n  b()\nelse:\n  if c:\n    d()'],
-    ['if (a) { b() } else if (c) { d() }', 'if a:\n  b()\nelse:\n  if c:\n    d()'],
+    ['if (a) if (b) if (c) { d() } else { e() }', 'if a:\n  if b:\n    if c:\n      d()\n    else:\n      e()'],
+    ['if (a) { b() } else for (let i = 0; i < 10; i++) { d(i) }', 'if a:\n  b()\nelse:\n  for i in range(0, 10):\n    d(i)'],
+    ['if (a) { b() } else if (c) d()', 'if a:\n  b()\nelif c:\n  d()'],
+    ['if (a) { b() } else if (c) { d() }', 'if a:\n  b()\nelif c:\n  d()'],
+    ['function z() { if (a) { b() } else if (c) { d() } else if (e) { f() } else { g() }}', 'def z():\n  if a:\n    b()\n  elif c:\n    d()\n  elif e:\n    f()\n  else:\n    g()\n'],
     ['if (a) if (b) c()', 'if a:\n  if b:\n    c()'],
     ['class A { b() { if (a) b() } }', 'class A:\n  def b(self):\n    if a:\n      b()\n\n'],
     ['class A { b() { if (a) { b() } } }', 'class A:\n  def b(self):\n    if a:\n      b()\n\n'],
@@ -169,6 +172,3 @@ test.skip('Manage/Insert imports', (t) => {
   t.plan(1)
 })
 
-test.skip('Elsif', (t) => {
-  t.plan(1)
-})

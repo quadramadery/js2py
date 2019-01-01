@@ -13,9 +13,22 @@ class ToPyCodeVisitor {
          : this.indent
   }
 
+  indentN(n) {
+    let newIndent = ''
+    for (let i = 0; i < n; i++) {
+      newIndent += this.DEFAULT_INDENT
+    }
+    return newIndent
+  }
+
   indentBlock(n, text) {
-    const ind = this.indentBy(n)
-    return ind + text.split('\n').join(`\n${this.DEFAULT_INDENT}`)
+    const relIndent = this.indentN(Math.abs(n))
+    const absIndent = this.indentBy(Math.abs(n))
+    if (n >= 0) {
+      return absIndent + text.split(`\n`).join(`\n${relIndent}`)
+    } else {
+      return text.replace(absIndent, '').split(`\n${relIndent}`).join(`\n`)
+    }
   }
 
   setIndent(n) {
@@ -179,9 +192,15 @@ ${this.indentBlock(+1, update)}`
     const consequent = node.consequent.type === 'BlockStatement' ? node.consequent.text : this.indentBlock(+1, node.consequent.text)
     const alternate = node.alternate && (node.alternate.type === 'BlockStatement' ? node.alternate.text : this.indentBlock(+1, node.alternate.text))
     const optionalAlternate = node.alternate ? `\n${this.indent}else:\n${alternate}` : ''
+    const optionalElIf = node.alternate && (
+      (node.alternate.type === 'IfStatement') || 
+      (node.alternate.type === 'BlockStatement' && 
+       node.alternate.body.length === 1 && 
+       node.alternate.body[0].type === 'IfStatement')) ? `\n${this.indent}el${this.indentBlock(-1, alternate)}` : ''
+
 
     node.text = `if ${node.test.text}:
-${consequent}${optionalAlternate}`
+${consequent}${optionalElIf || optionalAlternate}`
   }
 
   leaveConditionalExpression(node) {
