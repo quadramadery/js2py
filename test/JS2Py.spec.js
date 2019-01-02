@@ -89,6 +89,7 @@ test('language parts', (t) => {
     ['class A { b() { super.b() } }', 'class A:\n  def b(self):\n    super().b()\n\n'],
     ['class A { b() { super() } }', 'class A:\n  def b(self):\n    super().__init__()\n\n'],
     ['class A { b() { this.b() } }', 'class A:\n  def b(self):\n    self.b()\n\n'],
+    ['class A { static b() { f() } }', 'class A:\n  def b():\n    f()\n\n'],
     ['a === b', 'a == b'],
     ['a = {}', 'a = {}'],
     ['function a() { b = {} }', 'def a():\n  b = {}\n'],

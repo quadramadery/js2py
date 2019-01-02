@@ -113,7 +113,7 @@ class ToPyCodeVisitor {
     const NL_AFTER_METHOD = '\n'
     const isConstructor = node.kind === 'constructor'
     const methodName = isConstructor ? '__init__' : node.key.text
-    const selfAndParams = [{text: 'self'}].concat(node.value.params)
+    const selfAndParams = (node.static ? [] : [{text: 'self'}]).concat(node.value.params)
     const params = selfAndParams.map(p => p.text).join(', ')
     node.text = `def ${methodName}(${params}):\n${node.value.body.text}${NL_AFTER_METHOD}`
   }
