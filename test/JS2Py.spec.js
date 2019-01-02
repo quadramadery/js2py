@@ -139,6 +139,16 @@ test('Array', (t) => {
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
 })
 
+test('lodash', (t) => {
+  const cases = [
+    ['_isEmpty(a)', 'len(a) == 0'],
+    ['_max(a)', 'max(a)'],
+    ['_min(a)', 'min(a)'],
+  ]
+  t.plan(cases.length)
+  cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
+})
+
 test('Inline static class attrs', (t) => {
   const cases = [
     ['class A { fun() {return A.id}} A.id = "MyId"', 'class A:\n  def fun(self):\n    return "MyId"\n\n']
