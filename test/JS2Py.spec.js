@@ -142,8 +142,10 @@ test('Array', (t) => {
 test('lodash', (t) => {
   const cases = [
     ['_isEmpty(a)', 'len(a) == 0'],
+    ['_isFinite(a)', 'isfinite(a)'],
     ['_max(a)', 'max(a)'],
     ['_min(a)', 'min(a)'],
+    ["const a = require('lodash/isFinite')", ''],
   ]
   t.plan(cases.length)
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
