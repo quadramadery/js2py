@@ -13,11 +13,7 @@ class ApplyPatternsVisitor {
     for (const [from, to] of patterns) {
       const matches = from.match(ast)
       if (matches) {
-        if (to.ast) {
-          return to.ast
-        } else {
-          return (new Pattern(to)).apply(matches)
-        }
+        return (new Pattern(to)).apply(matches)
       }
     }
   }

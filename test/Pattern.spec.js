@@ -85,3 +85,35 @@ test('Apply pattern to statement', (t) => {
     alternate: null
   })
 })
+
+test('Pattern wildcard match bubbles up the ast tree to named parent argument', (t) => {
+  const p1 = new Pattern('f(_1arguments)')
+  const p2 = new Pattern('f(a, b)')
+
+  t.plan(1)
+  t.deepEqual(p1.match(p2.ast), {
+    '_1': [
+      {type: 'Identifier', name: 'a', start: 2, end: 3}, 
+      {type: 'Identifier', name: 'b', start: 5, end: 6}
+    ]
+  })
+})
+
+test('Pattern wildcard apply bubbles up the ast tree to named parent argument', (t) => {
+  const p1 = new Pattern('f(_1arguments)')
+  const matches = {
+    '_1': [
+      {type: 'Identifier', name: 'a', start: 2, end: 3}, 
+      {type: 'Identifier', name: 'b', start: 5, end: 6}
+    ]
+  }
+
+  t.plan(1)
+  t.deepEqual(p1.apply(matches), {
+    type: 'CallExpression',
+    start: 0,
+    end: 14,
+    callee: { type: 'Identifier', name: 'f', start: 0, end: 1 },
+    arguments: matches._1
+  })
+})

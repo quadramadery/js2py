@@ -139,6 +139,15 @@ test('Array', (t) => {
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
 })
 
+test('math', (t) => {
+  const cases = [
+    ['Math.max(1)', 'max([1])'],
+    ['Math.max(1, 2, 3)', 'max([1, 2, 3])']
+  ]
+  t.plan(cases.length)
+  cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
+})
+
 test('lodash', (t) => {
   const cases = [
     ['_isEmpty(a)', 'len(a) == 0'],

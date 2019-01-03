@@ -19,6 +19,14 @@ class JS2Py {
     Traverse.traverse(ast, new ObjectPatternDestructure())
     Traverse.traverse(ast, new BigNumberVisitor())
 
+    const math = new ApplyPatternsVisitor([
+      [
+        'Math.max(_1arguments)', 'max([_1elements])',
+        'Math.min(_1arguments)', 'min([_1elements])'
+      ],
+    ])
+    Traverse.traverse(ast, math)
+
     const bigNumber = new ApplyPatternsVisitor([
       ['BigN._1(_2)', '_1(_2)'],
       ['_1.minus(_2)', '_1 - _2'],
@@ -26,7 +34,8 @@ class JS2Py {
       ['_1.times(_2)', '_1 * _2'],
       ['_1.dividedBy(_2)', '_1 / _2'],
       ['_1.isEqualTo(_2)', '_1 == _2'],
-      ['_1.toNumber()', '_1']
+      ['_1.toNumber()', '_1'],
+      ["const _1 = require('bignumber.js')", {type: 'Noop'}],
     ])
     Traverse.traverse(ast, bigNumber)
 
@@ -45,7 +54,10 @@ class JS2Py {
       ['_isFinite(_1)', 'isfinite(_1)'], // TODO restrict to lodash.isFinite
       ['_max(_1)', 'max(_1)'], // TODO restrict to lodash.max
       ['_min(_1)', 'min(_1)'], // TODO restrict to lodash.min
-      ["const _1 = require('lodash/isFinite')", {ast: {type: 'Noop'}}]
+      ["const _1 = require('lodash/isFinite')", {type: 'Noop'}],
+      ["const _1 = require('lodash/isEmpty')", {type: 'Noop'}],
+      ["const _1 = require('lodash/min')", {type: 'Noop'}],
+      ["const _1 = require('lodash/max')", {type: 'Noop'}],
     ])
     Traverse.traverse(ast, lodash)
     Traverse.traverse(ast, new JSVisitor())

@@ -6,7 +6,7 @@ class Traverse {
     if (ast == null) return ast
 
     if (Array.isArray(ast)) {
-      return ast.map(elem => this.traverse(elem, visitor, ast))
+      return ast.map(elem => Traverse.traverse(elem, visitor, parent))
     }
 
     if (ast.type === undefined) {
@@ -19,7 +19,9 @@ class Traverse {
     visitor[enter] && visitor[enter](ast, parent)
     
     for (const k of Object.keys(ast)) {
-      ast[k] = this.traverse(ast[k], visitor, ast)
+      if (!['type', 'start', 'end'].includes(k))  {
+        ast[k] = Traverse.traverse(ast[k], visitor, ast)
+      }
     }
 
     const ret1 = visitor.leave && visitor.leave(ast, parent)

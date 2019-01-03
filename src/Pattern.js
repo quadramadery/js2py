@@ -5,46 +5,93 @@ const Traverse = require('./Traverse')
 
 class Pattern {
   constructor(
-    pattern, 
+    patternOrString, 
     {matchStatement} = {matchStatement: false}
   ) {
-    this.IS_VAR = /^_[0-9]+/
+    if (typeof patternOrString === 'string') {
+      const ast = espree.parse(patternOrString, {
+        ecmaVersion: 8,
+        sourceType: 'module'
+      })
+      this.ast = !matchStatement && ast.body[0].expression || ast.body[0]
+    } else {
+      this.ast = patternOrString
+    }
 
-    const ast = espree.parse(pattern, {
-      ecmaVersion: 8,
-      sourceType: 'module'
-    })
-
-    this.ast = !matchStatement && ast.body[0].expression || ast.body[0]
     this.type = this.ast.type
   }
 
+  isVar(name) {
+    return /^_[0-9]+/.test(name)
+  }
+
   apply (matches) {
+    const changesStack = []
     this.ast = Traverse.traverse(this.ast, {
-      leave: (ast) => 
-        (ast.type === 'Identifier' && this.IS_VAR.test(ast.name) && matches[ast.name])
-         ? matches[ast.name]
-         : ast
+      leave: (ast, parent) => {
+        changesStack.map(([obj, attr, newVal]) => {
+          if (obj === ast) {
+            ast[attr] = newVal
+          }
+        })
+
+        if (this.isVar(ast.name)) {
+          return this.applyVar(ast.name, ast, parent, matches, changesStack)
+        }
+      }
     })
 
     return this.ast
   }
 
+  applyVar(varName, ast, parent, matches, changesStack) {
+    const v = varName.replace(/^(_[0-9]+).*/, '$1')
+    const path = v === varName ? [] : varName.replace(/^_[0-9]+/, '').split('_')
+    if (path.length == 0) {
+      return matches[v]
+    } else {
+      if (path.length === 1) {
+        changesStack.push([parent, path[0], matches[v]])
+      }
+      return ast
+    }
+  }
+
   match (ast) {
-    Traverse.traverse(this.ast, {
-      leave: (ast) => {
+    const changesStack = []
+    this.ast = Traverse.traverse(this.ast, {
+      leave: (ast, parent) => {
         delete ast.start
         delete ast.end
-        if (ast.type === 'Identifier' && this.IS_VAR.test(ast.name)) {
-          ast.wildcard = true
+        if (this.isVar(ast.name)) {
+          this.matchVar(ast.name, ast, parent, changesStack)
         }
-        return ast
+
+        changesStack.map(([obj, attr, newVal]) => {
+          if (obj === ast) {
+            ast[attr] = newVal;
+          }
+        })
       }
     })
 
     const matches = {}
     const match = this._match(this.ast, ast, matches)
     return match ? matches : false
+  }
+
+  matchVar(varName, ast, parent, changesStack) {
+    const v = varName.replace(/^(_[0-9]+).*/, '$1')
+    const path = v === varName ? [] : varName.replace(/^_[0-9]+/, '').split('_')
+    if (path.length == 0) {
+      ast.wildcard = true
+    } else if (path.length === 1) {
+      changesStack.push([parent, path[0], {
+        type: 'Identifier',
+        name: v,
+        wildcard: true
+      }])
+    }
   }
 
   _match (a, b, matches) {
