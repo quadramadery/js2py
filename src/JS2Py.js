@@ -20,10 +20,11 @@ class JS2Py {
     Traverse.traverse(ast, new BigNumberVisitor())
 
     const math = new ApplyPatternsVisitor([
-      [
-        'Math.max(_1arguments)', 'max([_1elements])',
-        'Math.min(_1arguments)', 'min([_1elements])'
-      ],
+      ['Math.max(_1arguments)', 'max([_1elements])'],
+      ['Math.min(_1arguments)', 'min([_1elements])'],
+      ['Math.exp(_1)', 'exp(_1)'],
+      ['Math.pow(_1)', 'pow(_1)'],
+      ['Math.abs(_1)', 'abs(_1)'],
     ])
     Traverse.traverse(ast, math)
 
@@ -54,10 +55,12 @@ class JS2Py {
       ['_isFinite(_1)', 'isfinite(_1)'], // TODO restrict to lodash.isFinite
       ['_max(_1)', 'max(_1)'], // TODO restrict to lodash.max
       ['_min(_1)', 'min(_1)'], // TODO restrict to lodash.min
-      ["const _1 = require('lodash/isFinite')", {type: 'Noop'}],
+      ['_sum(_1)', 'sum(_1)'], // TODO restrict to lodash.sum
+      ["const _1 = require('lodash/isFinite')", "const isfinite = require('math')"],
       ["const _1 = require('lodash/isEmpty')", {type: 'Noop'}],
       ["const _1 = require('lodash/min')", {type: 'Noop'}],
       ["const _1 = require('lodash/max')", {type: 'Noop'}],
+      ["const _1 = require('lodash/sum')", {type: 'Noop'}],
     ])
     Traverse.traverse(ast, lodash)
     Traverse.traverse(ast, new JSVisitor())

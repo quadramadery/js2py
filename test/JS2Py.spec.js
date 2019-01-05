@@ -142,7 +142,11 @@ test('Array', (t) => {
 test('math', (t) => {
   const cases = [
     ['Math.max(1)', 'max([1])'],
-    ['Math.max(1, 2, 3)', 'max([1, 2, 3])']
+    ['Math.max(1, 2, 3)', 'max([1, 2, 3])'],
+    ['Math.min(1, 2, 3)', 'min([1, 2, 3])'],
+    ['Math.exp(1)', 'exp(1)'],
+    ['Math.pow(1)', 'pow(1)'],
+    ['Math.abs(1)', 'abs(1)'],
   ]
   t.plan(cases.length)
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
@@ -154,7 +158,8 @@ test('lodash', (t) => {
     ['_isFinite(a)', 'isfinite(a)'],
     ['_max(a)', 'max(a)'],
     ['_min(a)', 'min(a)'],
-    ["const a = require('lodash/isFinite')", ''],
+    ['_sum(a)', 'sum(a)'],
+    ["const a = require('lodash/isFinite')", 'from math import isfinite'],
   ]
   t.plan(cases.length)
   cases.map(([js, expected]) => t.equal(f.convert(js), expected, js))
