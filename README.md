@@ -14,6 +14,7 @@ class Calculator extends MathDevice {
   static max (a, b) {
     return BigN.max(a, b)
   }
+}
 ```
 
 into 
