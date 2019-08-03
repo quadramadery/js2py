@@ -18,7 +18,11 @@ class JSVisitor {
     this.patterns = [
       [new Pattern('_1 = require(_2)'), importDeclFn],
       [new Pattern('const _1 = require(_2)'), importDeclFn],
+      [new Pattern('let _1 = require(_2)'), importDeclFn],
+      [new Pattern('var _1 = require(_2)'), importDeclFn],
       [new Pattern('module.exports = _1'), removeFn],
+      [new Pattern('module.exports._1 = _2'), removeFn],
+      [new Pattern('exports._1 = _2'), removeFn],
     ]
   }
 
