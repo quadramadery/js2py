@@ -176,9 +176,9 @@ ${n.body.text}`
       node.text = `for ${id} in range(${low}, ${high}):\n${node.body.text}`
       return
     } else {
-      const init = node.init === null ? "" : node.init.text
-      const test = node.test === null ? "true" : node.test.text
-      const update = node.update === null ? "" : node.update.text
+      const init = node.init == null ? "" : node.init.text
+      const test = node.test == null ? "true" : node.test.text
+      const update = node.update == null ? "" : node.update.text
       const body = node.body.text
       node.text = `${init === "" ? "" : init + "\n"}${this.indent}while ${test}:
 ${this.indent}${body}${update === "" ? "" : "\n" + this.indentBlock(+1, update)}`
