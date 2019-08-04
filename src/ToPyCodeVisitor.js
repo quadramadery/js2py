@@ -164,10 +164,10 @@ ${n.body.text}`
 
   leaveForStatement(node) {
     const asForInRange = false ||
-      (node.init.type === 'VariableDeclaration' && node.init.declarations.length === 1) &&
-      ((node.update.type === 'UpdateExpression' && node.update.operator === '++') ||
-      (node.update.type === 'AssignmentExpression' && node.update.operator === '+=')) &&
-      (node.test.type === 'BinaryExpression')
+      (node.init !== null && node.init.type === 'VariableDeclaration' && node.init.declarations.length === 1) &&
+      ((node.update !== null && node.update.type === 'UpdateExpression' && node.update.operator === '++') ||
+      (node.update !== null && node.update.type === 'AssignmentExpression' && node.update.operator === '+=')) &&
+      (node.test !== null && node.test.type === 'BinaryExpression')
 
     if (asForInRange) {
       const id = node.init.declarations[0].id.name
@@ -176,14 +176,12 @@ ${n.body.text}`
       node.text = `for ${id} in range(${low}, ${high}):\n${node.body.text}`
       return
     } else {
-      const init = node.init.text
-      const test = node.test.text
-      const update = node.update.text
+      const init = (node.init && node.init.text) || ""
+      const test = (node.test && node.test.text) || "true"
+      const update = (node.update && node.update.text) || ""
       const body = node.body.text
-      node.text = `${init}
-${this.indent}while ${test}:
-${this.indent}${body}
-${this.indentBlock(+1, update)}`
+      node.text = `${init === "" ? "" : init + "\n"}${this.indent}while ${test}:
+${this.indent}${body}${update === "" ? "" : "\n" + this.indentBlock(+1, update)}`
       return
     }
   }
