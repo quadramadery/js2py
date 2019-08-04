@@ -178,11 +178,10 @@ ${n.body.text}`
     } else {
       const init = node.init === null ? "" : node.init.text
       const test = node.test === null ? "true" : node.test.text
-      const update = node.update === null ? null : node.update.text
+      const update = node.update === null ? "" : node.update.text
       const body = node.body.text
-      node.text = `${init}
-${this.indent}while ${test}:
-${this.indent}${body}${update === null ? "" : "\n" + this.indentBlock(+1, update)}`
+      node.text = `${init === "" ? "" : init + "\n"}${this.indent}while ${test}:
+${this.indent}${body}${update === "" ? "" : "\n" + this.indentBlock(+1, update)}`
       return
     }
   }
